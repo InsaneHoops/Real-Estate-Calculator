@@ -1,0 +1,3809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RentFlow">
+    <meta name="theme-color" content="#4a90a4">
+    <title>RentFlow - Investment Property Calculator</title>
+    <meta name="description" content="RentFlow helps real estate investors analyze rental properties with accurate ROI, cash flow, and multi-year return projections.">
+    <meta name="keywords" content="real estate calculator, rental property calculator, investment property, ROI calculator, cash flow analysis">
+    <meta name="author" content="RentFlow">
+    <style>
+        :root {
+            /* Light mode colors */
+            --bg-primary: linear-gradient(135deg, #f0f4f8 0%, #e8f0f5 100%);
+            --bg-primary-solid: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fb;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6c757d;
+            --text-tertiary: #495057;
+            --border-color: #e1e8ed;
+            --border-light: #f0f0f0;
+            --shadow: rgba(0,0,0,0.08);
+            --shadow-hover: rgba(74, 144, 164, 0.2);
+            --input-bg: #f8f9fb;
+            --accent-color: #4a90a4;
+            --accent-secondary: #357a8a;
+            --accent-light: #e8f4f8;
+            --gradient-primary: linear-gradient(135deg, #4a90a4 0%, #5ab0ca 100%);
+            --gradient-card: linear-gradient(135deg, rgba(74, 144, 164, 0.05) 0%, rgba(90, 176, 202, 0.05) 100%);
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --bg-primary: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            --bg-primary-solid: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-tertiary: #d0d0d0;
+            --border-color: #3a3a3a;
+            --border-light: #2d2d2d;
+            --shadow: rgba(0,0,0,0.5);
+            --shadow-hover: rgba(90, 176, 202, 0.4);
+            --input-bg: #2a2a2a;
+            --accent-color: #6fc5e0;
+            --accent-secondary: #5ab0ca;
+            --accent-light: #1a3a44;
+            --gradient-primary: linear-gradient(135deg, #6fc5e0 0%, #5ab0ca 100%);
+            --gradient-card: linear-gradient(135deg, rgba(111, 197, 224, 0.1) 0%, rgba(90, 176, 202, 0.1) 100%);
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+            padding-top: 44px;
+        }
+
+        /* App Header Bar */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 44px;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid transparent;
+            border-image: var(--gradient-primary) 1;
+            z-index: 998;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6px;
+            box-shadow: 0 2px 8px var(--shadow);
+            gap: 3px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* Hamburger inside header */
+        .header-hamburger {
+            background: transparent;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            width: 32px;
+            height: 32px;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-hamburger::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .header-hamburger:hover {
+            background: var(--accent-light);
+            transform: scale(1.1);
+        }
+
+        .header-hamburger:hover::before {
+            opacity: 0.1;
+        }
+
+        .header-hamburger:active {
+            transform: scale(0.95);
+        }
+
+        .header-hamburger span {
+            display: block;
+            width: 18px;
+            height: 2.5px;
+            background: var(--gradient-primary);
+            transition: 0.3s;
+            position: relative;
+            z-index: 1;
+            border-radius: 2px;
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            position: relative;
+            max-width: 200px;
+        }
+
+        .project-name-input {
+            width: 165px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            cursor: text;
+            pointer-events: auto;
+            user-select: text;
+            -webkit-user-select: text;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .project-name-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .project-name-input:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-color);
+        }
+
+        .project-name-input:focus {
+            outline: none;
+            background: var(--bg-tertiary);
+            border-color: var(--accent-color);
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            max-width: 200px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .header-btn {
+            background: transparent;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .header-btn:hover {
+            background: var(--accent-light);
+            transform: scale(1.1);
+        }
+
+        .header-btn:hover::before {
+            opacity: 0.1;
+        }
+
+        .header-btn:active {
+            transform: scale(0.95);
+        }
+
+        .header-btn svg {
+            width: 18px;
+            height: 18px;
+            color: var(--accent-color);
+            position: relative;
+            z-index: 1;
+            transition: color 0.2s;
+        }
+
+        .header-btn:hover svg {
+            color: var(--accent-color);
+            filter: drop-shadow(0 0 4px var(--accent-color));
+        }
+
+        .header-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+        }
+
+        .app-container {
+            padding: 6px 6px 6px 6px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .key-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 6px;
+            margin-left: 0;
+            margin-top: 6px;
+        }
+
+        .metric-card {
+            background: var(--gradient-card), var(--bg-secondary);
+            padding: 8px 6px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px var(--shadow), 0 0 0 1px var(--border-color);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 0;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--shadow-hover), 0 0 0 2px var(--accent-color);
+        }
+
+        .metric-card:hover::after {
+            opacity: 0.03;
+        }
+
+        .metric-card:active {
+            transform: translateY(-1px);
+        }
+
+        .metric-label {
+            font-size: 9px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            word-break: break-all;
+            line-height: 1.1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-value.positive { 
+            background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: #34c759;
+        }
+        
+        .metric-value.negative { 
+            background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: #ff3b30;
+        }
+
+        /* Override for browsers that don't support background-clip */
+        @supports not (background-clip: text) {
+            .metric-value.positive {
+                color: #34c759 !important;
+                background: none;
+            }
+            .metric-value.negative {
+                color: #ff3b30 !important;
+                background: none;
+            }
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 6px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+        }
+
+        .page > .section:first-child {
+            margin-top: 6px;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .section:hover {
+            box-shadow: 0 6px 20px var(--shadow-hover);
+            transform: translateY(-1px);
+        }
+
+        .section:hover::before {
+            opacity: 1;
+        }
+
+        .section.metrics-section {
+            padding: 0;
+            margin-top: -48px;
+        }
+
+        .section.metrics-section .section-content {
+            padding: 10px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            user-select: none;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--gradient-primary);
+            transform: scaleY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .section-header:hover {
+            background: var(--accent-light);
+        }
+
+        .section-header:hover::before {
+            transform: scaleY(1);
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+
+        .section-icon {
+            font-size: 12px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+
+        .section.collapsed .section-icon {
+            transform: rotate(-90deg);
+        }
+            transition: transform 0.3s;
+            font-weight: bold;
+        }
+
+        .section.collapsed .section-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 0 10px 0 10px;
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .section.collapsed .section-content {
+            max-height: 0;
+            padding: 0 10px;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .input-row:last-child {
+            border-bottom: none;
+        }
+
+        .input-row label {
+            font-size: 13px;
+            flex: 1;
+            color: var(--text-primary);
+        }
+
+        .conversion-helper {
+            font-size: 11px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            white-space: nowrap;
+            position: absolute;
+            right: 132px;
+            pointer-events: none;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+        }
+
+        .input-row input {
+            width: 95px;
+            padding: 5px 7px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: right;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+            font-weight: 600;
+        }
+
+        .input-row input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background: var(--bg-secondary);
+            box-shadow: 0 0 0 4px var(--accent-light), 0 4px 12px var(--shadow-hover);
+            transform: scale(1.02);
+        }
+
+        .toggle-btn {
+            padding: 3px 7px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            min-width: 26px;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toggle-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--shadow-hover);
+        }
+
+        .toggle-btn:hover::before {
+            opacity: 0.1;
+        }
+
+        .toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        .result-grid {
+            display: grid;
+            gap: 5px;
+            padding-top: 3px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            min-height: 38px;
+            box-shadow: 0 2px 8px var(--shadow), 0 0 0 1px var(--border-color);
+            border: none;
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--gradient-primary);
+            transform: scaleY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .result-item:hover {
+            background: var(--accent-light);
+            box-shadow: 0 4px 12px var(--shadow-hover), 0 0 0 2px var(--accent-color);
+            transform: translateX(3px);
+        }
+
+        .result-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .result-item-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .result-item-value {
+            font-size: 13px;
+            font-weight: 800;
+            margin-right: 3px;
+            min-width: 65px;
+            text-align: right;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-item > span:last-child {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .result-item-value.positive { 
+            background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .result-item-value.negative { 
+            background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .add-metric-btn {
+            padding: 2px 8px;
+            background: transparent;
+            color: #4a90a4;
+            border: 1px solid #4a90a4;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 8px;
+            opacity: 0.6;
+            transition: all 0.2s;
+            visibility: visible;
+        }
+
+        .add-metric-btn.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .pro-only.hidden {
+            display: none;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu-drawer {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 300px;
+            height: 100%;
+            background: var(--bg-secondary);
+            z-index: 1001;
+            transition: left 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-drawer.active {
+            left: 0;
+        }
+
+        .menu-header {
+            padding: 32px 24px 24px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--accent-color) 0%, #357a8a 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .menu-header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-header h2 {
+            font-size: 24px;
+            margin-bottom: 6px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .menu-header p {
+            font-size: 13px;
+            opacity: 0.85;
+            font-weight: 400;
+        }
+
+        .menu-items {
+            padding: 12px 0;
+            flex: 1;
+        }
+
+        .menu-section-title {
+            padding: 16px 24px 8px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .menu-item {
+            padding: 14px 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+            position: relative;
+            margin: 2px 12px;
+            border-radius: 10px;
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: var(--accent-color);
+            border-radius: 0 2px 2px 0;
+            transition: height 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .menu-item:hover::before {
+            height: 60%;
+        }
+
+        .menu-item:active {
+            transform: scale(0.98);
+        }
+
+        .menu-item-icon {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--accent-color);
+        }
+
+        .menu-item-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .menu-item-text {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .menu-item.pro-item {
+            background: linear-gradient(135deg, var(--accent-color), #5ab0ca);
+            color: white;
+            font-weight: 600;
+            margin: 12px 12px;
+            box-shadow: 0 4px 12px rgba(74, 144, 164, 0.3);
+        }
+
+        .menu-item.pro-item .menu-item-icon {
+            color: white;
+        }
+
+        .menu-item.pro-item .menu-item-text {
+            color: white;
+        }
+
+        .menu-item.pro-item:hover {
+            background: linear-gradient(135deg, #5ab0ca, var(--accent-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(74, 144, 164, 0.4);
+        }
+
+        .menu-item.pro-item::before {
+            display: none;
+        }
+
+        .menu-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .menu-footer-version {
+            font-weight: 600;
+            color: var(--text-tertiary);
+        }
+
+        .add-metric-btn:hover {
+            opacity: 1;
+            background: #4a90a4;
+            color: white;
+        }
+
+        .add-metric-btn:active {
+            transform: scale(0.95);
+        }
+
+        .metric-card.removable {
+            position: relative;
+        }
+
+        .metric-card.removable:has(.remove-metric-btn:not(.hidden)) {
+            padding-top: 24px;
+        }
+
+        .remove-metric-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            padding: 0;
+            width: 18px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #86868b;
+            border: none;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: 400;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-metric-btn:hover {
+            opacity: 1;
+            background: #ff3b30;
+            color: white;
+        }
+
+        .remove-metric-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Bottom Navigation */
+        /* Page content */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Pro badge */
+        .pro-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1d1d1f;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+
+        /* COMPACT MODE OVERRIDES */
+        body { padding-top: 44px; }
+        .app-header { height: 44px; padding: 0 6px; gap: 3px; }
+        .header-hamburger { width: 32px; height: 32px; padding: 8px; gap: 3px; border-radius: 6px; }
+        .header-hamburger span { width: 18px; }
+        .project-name-input { max-width: 180px; font-size: 13px; padding: 4px 6px; border-radius: 5px; }
+        .header-btn { width: 32px; height: 32px; padding: 6px; border-radius: 6px; }
+        .header-btn svg { width: 18px; height: 18px; }
+        .app-container { padding: 0 6px 6px 6px; }
+        .key-metrics { grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 6px; margin-top: 6px; }
+        .metric-card { padding: 8px 6px; border-radius: 8px; }
+        .metric-label { font-size: 9px; letter-spacing: 0.5px; margin-bottom: 3px; }
+        .metric-value { font-size: 16px; line-height: 1.1; }
+        .section { border-radius: 8px; margin-bottom: 6px; }
+        .section.metrics-section .section-content { padding: 10px; }
+        .section-header { padding: 8px 10px; }
+        .section-title { font-size: 13px; }
+        .section-icon { font-size: 12px; }
+        .section-content { padding: 0 10px 0 10px; }
+        .section.collapsed .section-content { padding: 0 10px; }
+        .input-row { padding: 6px 0; }
+        .input-row label { font-size: 13px; }
+        .input-wrapper { gap: 5px; }
+        .input-row input { width: 95px; padding: 5px 7px; border-radius: 5px; font-size: 13px; }
+        .toggle-btn { padding: 3px 7px; font-size: 10px; min-width: 26px; }
+        .result-grid { gap: 5px; padding-top: 3px; }
+        .result-item { padding: 8px 10px; border-radius: 6px; min-height: 38px; }
+        .result-item-label { font-size: 12px; }
+        .result-item-value { font-size: 13px; margin-right: 3px; min-width: 65px; }
+
+        /* Advanced Section Styling */
+        .hold-period-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .hold-period-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hold-period-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .hold-period-btn:active {
+            transform: scale(0.97);
+        }
+
+        .hold-period-btn.active {
+            border: 2px solid var(--accent-color);
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--shadow-hover);
+        }
+
+        .advanced-input-card {
+            background: var(--gradient-card);
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .advanced-input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .advanced-input-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .advanced-input-field {
+            width: 80px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .advanced-input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .projection-card {
+            background: var(--gradient-card);
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .projection-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .projection-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .projection-subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .projection-subtitle-highlight {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .projection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .projection-metric {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .projection-metric-label {
+            font-size: 9px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .projection-metric-value {
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .projection-metric-value.gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .projection-metric-caption {
+            font-size: 9px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        .additional-metrics-card {
+            background: var(--gradient-card);
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .additional-metrics-header {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .additional-metrics-subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .metric-add-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 10px 8px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-add-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .metric-add-btn:active {
+            transform: translateY(0);
+        }
+
+        .metric-add-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-add-text {
+            font-size: 11px;
+            color: var(--accent-color);
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Future Projections Design */
+        .projections-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .projection-box {
+            background: var(--gradient-card), var(--bg-secondary);
+            border-radius: 12px;
+            padding: 10px 12px;
+            box-shadow: 0 4px 12px var(--shadow), 0 0 0 1px var(--border-color);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .projection-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 0;
+        }
+
+        .projection-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--shadow-hover), 0 0 0 2px var(--accent-color);
+        }
+
+        .projection-box:hover::after {
+            opacity: 0.03;
+        }
+
+        .projection-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .projection-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .projection-value.positive {
+            color: #34c759 !important;
+        }
+
+        .projection-value.negative {
+            color: #ff3b30 !important;
+        }
+
+        .projection-value.neutral {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .projection-value.loan-balance {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+    
+    <!-- Capacitor will inject its scripts here when building the native app -->
+</head>
+<body>
+    <!-- SVG Icon Sprite -->
+    <svg style="display: none;">
+        <defs>
+            <!-- Menu/Hamburger -->
+            <symbol id="icon-menu" viewBox="0 0 24 24">
+                <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
+            
+            <!-- Trash/Delete -->
+            <symbol id="icon-trash" viewBox="0 0 24 24">
+                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </symbol>
+            
+            <!-- Save/Floppy Disk - Feather Style -->
+            <symbol id="icon-save" viewBox="0 0 24 24">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="17 21 17 13 7 13 7 21" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="7 3 7 8 15 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            
+            <!-- Download/Export -->
+            <symbol id="icon-export" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
+            
+            <!-- Home -->
+            <symbol id="icon-home" viewBox="0 0 24 24">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            
+            <!-- Chart/Metrics -->
+            <symbol id="icon-chart" viewBox="0 0 24 24">
+                <line x1="12" y1="20" x2="12" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="18" y1="20" x2="18" y2="4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="6" y1="20" x2="6" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
+            
+            <!-- Moon (Dark Mode) -->
+            <symbol id="icon-moon" viewBox="0 0 24 24">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+            
+            <!-- Info (About) -->
+            <symbol id="icon-info" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                <line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="8" r="1" fill="currentColor"/>
+            </symbol>
+            
+            <!-- Lock (Privacy) -->
+            <symbol id="icon-lock" viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </symbol>
+            
+            <!-- File (Terms) -->
+            <symbol id="icon-file" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
+            
+            <!-- Star (Pro/Upgrade) -->
+            <symbol id="icon-star" viewBox="0 0 24 24">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor"/>
+            </symbol>
+            
+            <!-- Edit/Pencil -->
+            <symbol id="icon-edit" viewBox="0 0 24 24">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+
+            <!-- Pin Icon -->
+            <symbol id="icon-pin" viewBox="0 0 24 24">
+                <path d="M16 4v8l2 2v1h-5v7l-1 2-1-2v-7H6v-1l2-2V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <!-- App Header Bar -->
+    <div class="app-header">
+        <button class="header-hamburger" id="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="header-center">
+            <div style="display: flex; align-items: center; gap: 4px;">
+                <input type="text" class="project-name-input" id="projectName" placeholder="My Investment Property" value="" autocomplete="off" spellcheck="false" oninput="hideEditIcon()" onfocus="hideEditIcon()" onblur="showEditIcon()">
+                <svg id="editIcon" width="14" height="14" style="opacity: 0.5; cursor: pointer; flex-shrink: 0; color: var(--accent-color);" onclick="document.getElementById('projectName').focus(); document.getElementById('projectName').select();"><use href="#icon-edit"/></svg>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="clearAll()" title="Clear All">
+                <svg width="20" height="20"><use href="#icon-trash"/></svg>
+            </button>
+            <button class="header-btn" onclick="downloadCalculation()" title="Export">
+                <svg width="20" height="20"><use href="#icon-export"/></svg>
+            </button>
+            <button class="header-btn" onclick="saveCalculation()" title="Save">
+                <svg width="20" height="20"><use href="#icon-save"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+    <!-- Menu Drawer -->
+    <div class="menu-drawer" id="menuDrawer">
+        <div class="menu-header">
+            <div class="menu-header-content">
+                <h2>RentFlow</h2>
+                <p>Property Investment Calculator</p>
+            </div>
+        </div>
+        <div class="menu-items">
+            <div class="menu-section-title">NAVIGATION</div>
+            <div class="menu-item" onclick="navigateTo('calculator')">
+                <span class="menu-item-icon">
+                    <svg width="20" height="20"><use href="#icon-home"/></svg>
+                </span>
+                <span class="menu-item-text">Calculator</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('saved')">
+                <span class="menu-item-icon">
+                    <svg width="20" height="20"><use href="#icon-save"/></svg>
+                </span>
+                <span class="menu-item-text">Saved Calculations</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('metrics')">
+                <span class="menu-item-icon">
+                    <svg width="20" height="20"><use href="#icon-chart"/></svg>
+                </span>
+                <span class="menu-item-text">Advanced Metrics</span>
+            </div>
+            
+            <div class="menu-section-title">SETTINGS</div>
+            <div class="menu-item" onclick="toggleDarkMode(event)">
+                <span class="menu-item-icon">
+                    <svg width="20" height="20"><use href="#icon-moon"/></svg>
+                </span>
+                <span class="menu-item-text">Dark Mode</span>
+            </div>
+            
+            <div class="menu-section-title">INFORMATION</div>
+            <div class="menu-item" onclick="navigateTo('about')">
+                <span class="menu-item-icon">
+                    <svg width="20" height="20"><use href="#icon-info"/></svg>
+                </span>
+                <span class="menu-item-text">About</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('privacy')">
+                <span class="menu-item-icon">
+                    <svg width="20" height="20"><use href="#icon-lock"/></svg>
+                </span>
+                <span class="menu-item-text">Privacy Policy</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('terms')">
+                <span class="menu-item-icon">
+                    <svg width="20" height="20"><use href="#icon-file"/></svg>
+                </span>
+                <span class="menu-item-text">Terms of Service</span>
+            </div>
+            
+            <div class="menu-item pro-item" onclick="upgradeToPro()">
+                <span class="menu-item-icon">
+                    <svg width="20" height="20"><use href="#icon-star"/></svg>
+                </span>
+                <span class="menu-item-text">Upgrade to Pro</span>
+            </div>
+        </div>
+        <div class="menu-footer">
+            <div class="menu-footer-version">RentFlow v1.0</div>
+            <div style="margin-top: 4px; opacity: 0.7;">Made with care for investors</div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Page 1: Calculator -->
+        <div class="page active" id="page-calculator">
+        <div class="key-metrics">
+            <div class="metric-card removable" data-metric="coc">
+                <div class="metric-label">ROI</div>
+                <div class="metric-value" id="cocMetric">-</div>
+            </div>
+            <div class="metric-card removable" data-metric="capRate">
+                <div class="metric-label">Cap Rate</div>
+                <div class="metric-value" id="capRateMetric">-</div>
+            </div>
+            <div class="metric-card removable" data-metric="monthlyCashFlow">
+                <div class="metric-label">Cash Flow</div>
+                <div class="metric-value" id="cashFlowMetric">-</div>
+            </div>
+        </div>
+
+        <div class="section" id="section-property">
+            <div class="section-header">
+                <div class="section-title">Property Details</div>
+                <div class="section-icon">▼</div>
+            </div>
+            <div class="section-content">
+                <div class="input-row">
+                    <label>Purchase Price</label>
+                    <input type="text" id="purchasePrice" placeholder="$0" inputmode="numeric">
+                </div>
+                <div class="input-row">
+                    <label id="downPaymentLabel">Down Payment</label>
+                    <span class="conversion-helper" id="downPayment-conversion"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="downPayment" placeholder="0%" inputmode="decimal">
+                        <button class="toggle-btn" id="toggle-downPayment">%</button>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Interest Rate</label>
+                    <span class="conversion-helper" id="interestRate-conversion"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="interestRate" placeholder="0%" inputmode="decimal">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Loan Term (Yr)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="loanTerm" value="30" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Closing Costs</label>
+                    <span class="conversion-helper" id="closingCosts-conversion"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="closingCosts" placeholder="0%" inputmode="decimal">
+                        <button class="toggle-btn" id="toggle-closingCosts">%</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="section-expenses">
+            <div class="section-header">
+                <div class="section-title">Income & Expenses</div>
+                <div class="section-icon">▼</div>
+            </div>
+            <div class="section-content">
+                <div class="input-row">
+                    <label>Monthly Rent</label>
+                    <span class="conversion-helper" id="rent-conversion"></span>
+                    <input type="text" id="monthlyRent" placeholder="$0" inputmode="numeric">
+                </div>
+                <div class="input-row">
+                    <label>Annual Property Tax</label>
+                    <span class="conversion-helper" id="propertyTax-conversion"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="propertyTax" placeholder="$0" inputmode="numeric">
+                        <button class="toggle-btn" id="toggle-propertyTax">$</button>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Annual Insurance</label>
+                    <span class="conversion-helper" id="insurance-conversion"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="insurance" placeholder="$0" inputmode="numeric">
+                        <button class="toggle-btn" id="toggle-insurance">$</button>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Annual Maintenance</label>
+                    <span class="conversion-helper" id="maintenance-conversion"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="maintenance" placeholder="$0" inputmode="numeric">
+                        <button class="toggle-btn" id="toggle-maintenance">$</button>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Monthly HOA Fees</label>
+                    <span class="conversion-helper" id="hoaFees-conversion"></span>
+                    <input type="text" id="hoaFees" placeholder="$0" inputmode="numeric">
+                </div>
+                <div class="input-row">
+                    <label>Monthly Utilities</label>
+                    <span class="conversion-helper" id="utilities-conversion"></span>
+                    <input type="text" id="utilities" placeholder="$0" inputmode="numeric">
+                </div>
+                <div class="input-row">
+                    <label>Annual Management Fee</label>
+                    <span class="conversion-helper" id="managementFee-conversion"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="managementFee" placeholder="0%" inputmode="decimal">
+                        <button class="toggle-btn" id="toggle-managementFee">%</button>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Annual Vacancy/Loss</label>
+                    <span class="conversion-helper" id="vacancyRate-conversion"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="vacancyRate" placeholder="0%" inputmode="decimal">
+                        <button class="toggle-btn" id="toggle-vacancyRate">%</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sale Metrics Section (Pinnable) -->
+        <div class="section" id="section-advanced" style="display: none;">
+            <div class="section-header">
+                <div class="section-title">Sale Metrics</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button onclick="unpinAdvancedMetrics()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 18px; padding: 0; line-height: 1;">×</button>
+                    <div class="section-icon">▼</div>
+                </div>
+            </div>
+            <div class="section-content">
+                <!-- Analysis Parameters -->
+                <div class="input-row">
+                    <label>Hold Period (Yr)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="holdPeriod-calc" value="" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Annual Appreciation</label>
+                    <span class="conversion-helper" id="appreciation-conversion-calc"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="appreciationAdv-calc" value="3%" placeholder="3%" inputmode="decimal">
+                        <button class="toggle-btn" id="toggle-appreciationAdv-calc">%</button>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Sales Expense</label>
+                    <span class="conversion-helper" id="salesExpense-conversion-calc"></span>
+                    <div class="input-wrapper">
+                        <input type="text" id="salesExpense-calc" value="6%" placeholder="6%" inputmode="decimal">
+                        <button class="toggle-btn" id="toggle-salesExpense-calc">%</button>
+                    </div>
+                </div>
+                
+                <!-- Future Projections -->
+                <div style="margin-top: 6px; margin-bottom: 6px;">
+                    <div class="projections-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="projection-box">
+                            <div class="projection-label">Total Loan Payments</div>
+                            <div id="loanBalance-calc" class="projection-value neutral">-</div>
+                        </div>
+                        <div class="projection-box">
+                            <div class="projection-label">Net Equity at Sale</div>
+                            <div id="netEquity-calc" class="projection-value neutral">-</div>
+                        </div>
+                        <div class="projection-box">
+                            <div class="projection-label">Total Profit From Sale</div>
+                            <div id="totalProfit-calc" class="projection-value neutral">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <!-- End Page 1 -->
+
+        <!-- Page 2: Advanced Analysis (Pro) -->
+        <div class="page" id="page-metrics">
+            
+            <!-- Pin Info Card -->
+            <div style="background: var(--gradient-card); background-color: var(--bg-secondary); border-radius: 12px; padding: 16px; margin: 12px 12px 12px 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px var(--shadow);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Sale Metrics</div>
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">Configure hold period, appreciation, and view future projections. Pin this section to your calculator for quick access.</div>
+                <button onclick="pinAdvancedMetrics()" style="width: 100%; padding: 10px; background: var(--gradient-primary); border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px var(--shadow-hover); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <svg width="16" height="16" style="fill: none;"><use href="#icon-pin"/></svg>
+                    Pin to Calculator
+                </button>
+            </div>
+
+            <!-- Combined Sale Metrics Section (matches pinned version) -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">Sale Metrics</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="section-icon">▼</div>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <!-- Analysis Parameters -->
+                    <div class="input-row">
+                        <label>Hold Period (Yr)</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="holdPeriod" value="" placeholder="0" inputmode="numeric">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <label>Annual Appreciation</label>
+                        <span class="conversion-helper" id="appreciation-conversion"></span>
+                        <div class="input-wrapper">
+                            <input type="text" id="appreciationAdv" value="3%" placeholder="3%" inputmode="decimal">
+                            <button class="toggle-btn" id="toggle-appreciationAdv">%</button>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <label>Sales Expense</label>
+                        <span class="conversion-helper" id="salesExpense-conversion"></span>
+                        <div class="input-wrapper">
+                            <input type="text" id="salesExpense" value="6%" placeholder="6%" inputmode="decimal">
+                            <button class="toggle-btn" id="toggle-salesExpense">%</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Future Projections (inside same section) -->
+                    <div style="margin-top: 6px; margin-bottom: 6px;">
+                        <div class="projections-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div class="projection-box">
+                                <div class="projection-label">Total Loan Payments</div>
+                                <div id="loanBalance" class="projection-value">$0</div>
+                            </div>
+                            <div class="projection-box">
+                                <div class="projection-label">Net Equity at Sale</div>
+                                <div id="netEquity" class="projection-value">$0</div>
+                            </div>
+                            <div class="projection-box">
+                                <div class="projection-label">Total Profit From Sale</div>
+                                <div id="totalProfit" class="projection-value">$0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Metrics Section -->
+            <div class="additional-metrics-card">
+                <div class="additional-metrics-header">Additional Metrics</div>
+                <div class="additional-metrics-subtitle">Pin these metrics to your calculator for quick reference</div>
+                
+                <div class="metrics-grid">
+                    <div data-metric="grm" onclick="addToTop('grm', 'GRM', 'grm')" class="metric-add-btn">
+                        <div class="metric-add-label">Gross Rent Multiplier</div>
+                        <div class="metric-add-text">+ Add</div>
+                    </div>
+                    <div data-metric="dscr" onclick="addToTop('dscr', 'DSCR', 'dscr')" class="metric-add-btn">
+                        <div class="metric-add-label">Debt Service Coverage Ratio</div>
+                        <div class="metric-add-text">+ Add</div>
+                    </div>
+                    <div data-metric="ltv" onclick="addToTop('ltv', 'LTV', 'ltv')" class="metric-add-btn">
+                        <div class="metric-add-label">Loan-to-Value Ratio</div>
+                        <div class="metric-add-text">+ Add</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Page 2 -->
+
+        <!-- Page 3: Saved Calculations -->
+        <div class="page" id="page-saved">
+            <div style="padding: 12px;">
+                <div id="saved-list">
+                    <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary); opacity: 0.6;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">No saved calculations</div>
+                        <div style="font-size: 12px;">Save from calculator to view here</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Page 3 -->
+
+        <!-- Page 4: About -->
+        <div class="page" id="page-about">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">About RentFlow</div>
+                </div>
+                <div class="section-content" style="padding: 16px;">
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <div style="margin-bottom: 16px;">
+                            <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+                        <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">RentFlow</h2>
+                        <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 6px;">Investment Property Calculator</p>
+                        <p style="font-size: 13px; color: var(--text-secondary); opacity: 0.7;">Version 1.0.0</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 28px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">About</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            RentFlow is a powerful investment calculator designed for real estate investors who need to analyze rental properties quickly and accurately. Make informed decisions with instant calculations of ROI, Cap Rate, Cash Flow, and comprehensive multi-year projections.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 28px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Key Features</h3>
+                        <ul style="font-size: 15px; line-height: 2; color: var(--text-tertiary); padding-left: 20px; list-style-type: disc;">
+                            <li>Instant ROI, Cap Rate & Cash Flow calculations</li>
+                            <li>Flexible input types (dollar amounts or percentages)</li>
+                            <li>Save unlimited calculations locally</li>
+                            <li>Multi-year projections with equity tracking</li>
+                            <li>Clean, professional interface</li>
+                            <li>Complete privacy - no data collection</li>
+                        </ul>
+                    </div>
+
+                    <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                            Built for real estate investors,<br>by real estate investors
+                        </p>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-top: 12px; opacity: 0.6;">
+                            © 2025 RentFlow. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Page 4 -->
+
+        <!-- Page 5: Privacy Policy -->
+        <div class="page" id="page-privacy">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">Privacy Policy</div>
+                </div>
+                <div class="section-content" style="padding: 16px;">
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; opacity: 0.7;">Effective Date: November 22, 2025</p>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary); margin-bottom: 20px;">
+                            At RentFlow, your privacy is our priority. This Privacy Policy explains how we handle your information when you use our app.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Data Collection</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            RentFlow does not collect, transmit, or store any personal information. We have no servers, no accounts, and no user tracking of any kind.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Local Storage</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            All of your calculations, property data, and app preferences are stored locally on your device. This information never leaves your device and is completely under your control. You can delete this data at any time by uninstalling the app.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Analytics & Tracking</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            We do not use any analytics services, tracking pixels, or third-party tools. Your usage of RentFlow is completely private and anonymous.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Third-Party Services</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            RentFlow does not integrate with any third-party services or APIs. The app functions entirely offline after installation.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Changes to This Policy</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            We may update this Privacy Policy from time to time. Any changes will be reflected in the app with an updated "Effective Date" above.
+                        </p>
+                    </div>
+
+                    <div style="padding-top: 16px; border-top: 1px solid var(--border-color);">
+                        <p style="font-size: 13px; line-height: 1.6; color: var(--text-secondary); text-align: center;">
+                            Your privacy matters. We built RentFlow to be completely private by design.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Page 5 -->
+
+        <!-- Page 6: Terms of Service -->
+        <div class="page" id="page-terms">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">Terms of Service</div>
+                </div>
+                <div class="section-content" style="padding: 16px;">
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; opacity: 0.7;">Effective Date: November 22, 2025</p>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            By downloading, installing, or using RentFlow ("the App"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the App.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">License to Use</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            RentFlow grants you a personal, non-exclusive, non-transferable license to use the App for your personal or commercial real estate investment analysis purposes.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Informational Tool Only</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            RentFlow is provided as a calculation and informational tool only. All calculations and projections are estimates based on the data you provide. You are solely responsible for verifying all calculations independently before making any financial decisions.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Not Financial Advice</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            RentFlow does not provide financial, investment, tax, or legal advice. The information and calculations provided by the App are for informational purposes only and should not be relied upon as the sole basis for any investment decision. Always consult with qualified financial, legal, and tax professionals before making investment decisions.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">No Warranties</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            THE APP IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. We do not warrant that the App will be error-free, uninterrupted, or that calculations will be accurate, complete, or reliable. Use of the App is at your own risk.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Limitation of Liability</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            To the maximum extent permitted by law, RentFlow and its developers shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, revenue, data, or business opportunities arising from your use of the App, even if advised of the possibility of such damages.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">User Responsibilities</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            You are responsible for ensuring that all data you input into the App is accurate and complete. You acknowledge that the quality of the App's calculations depends entirely on the accuracy of your inputs.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Changes to Terms</h3>
+                        <p style="font-size: 15px; line-height: 1.7; color: var(--text-tertiary);">
+                            We reserve the right to modify these Terms of Service at any time. Changes will be effective immediately upon posting within the App with an updated "Effective Date." Your continued use of the App after any changes constitutes acceptance of the new terms.
+                        </p>
+                    </div>
+
+                    <div style="padding-top: 16px; border-top: 1px solid var(--border-color);">
+                        <p style="font-size: 13px; line-height: 1.6; color: var(--text-secondary); text-align: center;">
+                            By using RentFlow, you acknowledge that you have read, understood,<br>and agree to be bound by these Terms of Service.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Page 6 -->
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 10000; backdrop-filter: blur(4px);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-primary); border-radius: 16px; padding: 24px; max-width: 320px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <div style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Delete Calculation?</div>
+            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5;">Are you sure you want to delete this saved calculation? This action cannot be undone.</div>
+            <div style="display: flex; gap: 10px;">
+                <button id="cancelDelete" style="flex: 1; background: var(--bg-tertiary); color: var(--text-primary); border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button id="confirmDelete" style="flex: 1; background: #ff3b30; color: white; border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Name Modal -->
+    <div id="saveNameModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 10000; backdrop-filter: blur(4px);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-primary); border-radius: 16px; padding: 24px; max-width: 320px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <div style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Name Your Calculation</div>
+            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">Enter a name to identify this calculation</div>
+            <input type="text" id="saveNameInput" placeholder="My Investment Property" style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 15px; margin-bottom: 16px; background: var(--bg-secondary); color: var(--text-primary); box-sizing: border-box;">
+            <div style="display: flex; gap: 10px;">
+                <button id="cancelSaveName" style="flex: 1; background: var(--bg-tertiary); color: var(--text-primary); border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button id="confirmSaveName" style="flex: 1; background: var(--gradient-primary); color: white; border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overwrite Confirmation Modal -->
+    <div id="overwriteModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.4); z-index: 10000; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-secondary); border-radius: 14px; max-width: 280px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35); overflow: hidden;">
+            <div style="padding: 20px 16px 16px 16px; text-align: center;">
+                <div style="font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Replace Existing?</div>
+                <div id="overwriteMessage" style="font-size: 13px; color: var(--text-secondary); line-height: 1.4;"></div>
+            </div>
+            <div style="border-top: 0.5px solid var(--border-color);">
+                <button id="overwriteNo" style="width: 100%; background: transparent; color: var(--accent-color); border: none; border-bottom: 0.5px solid var(--border-color); padding: 11px; font-size: 17px; font-weight: 400; cursor: pointer;">Save as Copy</button>
+                <button id="overwriteYes" style="width: 100%; background: transparent; color: var(--accent-color); border: none; padding: 11px; font-size: 17px; font-weight: 600; cursor: pointer;">Replace</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Pro feature flag - temporarily set to true for testing
+        const isPro = true;
+        
+        // Dark mode functions
+        function toggleDarkMode(event) {
+            event.stopPropagation(); // Prevent menu from closing
+            
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme on page load
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        }
+        
+        // Menu functions
+        function toggleMenu() {
+            const hamburger = document.getElementById('hamburger');
+            const overlay = document.getElementById('menuOverlay');
+            const drawer = document.getElementById('menuDrawer');
+            
+            hamburger.classList.toggle('active');
+            overlay.classList.toggle('active');
+            drawer.classList.toggle('active');
+        }
+
+        function navigateTo(pageName) {
+            // Close menu
+            toggleMenu();
+            
+            // Small delay for better UX
+            setTimeout(() => {
+                switchPage(pageName);
+            }, 300);
+        }
+
+        function exportData() {
+            const projectName = document.getElementById('projectName')?.value || 'My Investment';
+            const data = {
+                projectName: projectName,
+                purchasePrice: document.getElementById('purchasePrice')?.value || '',
+                downPayment: document.getElementById('downPayment')?.value || '',
+                downPaymentType: inputTypes.downPayment,
+                interestRate: document.getElementById('interestRate')?.value || '',
+                loanTerm: document.getElementById('loanTerm')?.value || '',
+                closingCosts: document.getElementById('closingCosts')?.value || '',
+                closingCostsType: inputTypes.closingCosts,
+                monthlyRent: document.getElementById('monthlyRent')?.value || '',
+                propertyTax: document.getElementById('propertyTax')?.value || '',
+                propertyTaxType: inputTypes.propertyTax,
+                insurance: document.getElementById('insurance')?.value || '',
+                insuranceType: inputTypes.insurance,
+                hoaFees: document.getElementById('hoaFees')?.value || '',
+                hoaFeesType: inputTypes.hoaFees,
+                maintenance: document.getElementById('maintenance')?.value || '',
+                maintenanceType: inputTypes.maintenance,
+                utilities: document.getElementById('utilities')?.value || '',
+                utilitiesType: inputTypes.utilities,
+                managementFee: document.getElementById('managementFee')?.value || '',
+                managementFeeType: inputTypes.managementFee,
+                vacancyRate: document.getElementById('vacancyRate')?.value || '',
+                vacancyRateType: inputTypes.vacancyRate,
+                timestamp: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${projectName.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function upgradeToPro() {
+            toggleMenu();
+            alert('Upgrade to Pro coming soon!\n\nUnlock:\n• Sale Metrics\n• Unlimited Saves\n• Customize Top Metrics\n• Priority Support');
+        }
+        
+        // Page switching
+        function switchPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            
+            // Show selected page
+            if (pageName === 'calculator') {
+                document.getElementById('page-calculator').classList.add('active');
+            } else if (pageName === 'metrics') {
+                document.getElementById('page-metrics').classList.add('active');
+            } else if (pageName === 'saved') {
+                document.getElementById('page-saved').classList.add('active');
+                loadSavedCalculations();
+            } else if (pageName === 'about') {
+                document.getElementById('page-about').classList.add('active');
+            } else if (pageName === 'privacy') {
+                document.getElementById('page-privacy').classList.add('active');
+            } else if (pageName === 'terms') {
+                document.getElementById('page-terms').classList.add('active');
+            }
+        }
+
+        const inputTypes = {
+            downPayment: '%',
+            closingCosts: '%',
+            propertyTax: '$',
+            insurance: '$',
+            hoaFees: '$',
+            maintenance: '$',
+            utilities: '$',
+            managementFee: '%',
+            vacancyRate: '%',
+            salesExpense: '%',
+            'salesExpense-calc': '%',
+            appreciationAdv: '%',
+            'appreciationAdv-calc': '%'
+        };
+
+        // Track top 3 metrics
+        let topMetrics = ['coc', 'capRate', 'monthlyCashFlow'];
+
+        // FOR TESTING: To simulate Pro mode, open browser console and type:
+        // localStorage.setItem('isPro', 'true')
+        // To go back to free mode:
+        // localStorage.setItem('isPro', 'false')
+
+        // These functions need to be at the top for inline onclick handlers
+        function addToTop(metricKey, label, valueId) {
+            if (topMetrics.includes(metricKey)) {
+                return; // Silently do nothing if already pinned
+            }
+
+            // Add to top
+            topMetrics.push(metricKey);
+            
+            // Get current value from the bottom section
+            const bottomValue = document.getElementById(valueId);
+            const currentValue = bottomValue ? bottomValue.textContent : '-';
+            const currentClass = bottomValue ? bottomValue.className : '';
+            
+            // Create new metric card with same styling as defaults
+            const keyMetricsDiv = document.querySelector('.key-metrics');
+            const newCard = document.createElement('div');
+            newCard.className = 'metric-card removable';
+            newCard.setAttribute('data-metric', metricKey);
+            newCard.innerHTML = `
+                <div class="metric-label">${label}</div>
+                <div class="metric-value" id="${metricKey}Metric">${currentValue}</div>
+            `;
+            keyMetricsDiv.appendChild(newCard);
+            
+            // Update Additional Metrics buttons to show "Added"
+            const addBtns = document.querySelectorAll(`[data-metric="${metricKey}"]`);
+            addBtns.forEach(btn => {
+                const addText = btn.querySelector('.metric-add-text');
+                if (addText) {
+                    addText.textContent = '✓ Added';
+                    addText.style.color = '#34c759';
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.6';
+                }
+            });
+            
+            // Re-calculate to update the new metric card
+            calculate();
+        }
+
+        function removeFromTop(metricKey) {
+            // Remove from array
+            topMetrics = topMetrics.filter(m => m !== metricKey);
+            
+            // Remove card from DOM
+            document.querySelector(`.key-metrics [data-metric="${metricKey}"]`).remove();
+            
+            // Reset Additional Metrics buttons back to "+ Add"
+            const addBtns = document.querySelectorAll(`[data-metric="${metricKey}"]`);
+            addBtns.forEach(btn => {
+                const addText = btn.querySelector('.metric-add-label');
+                const addBtn = btn.querySelector('.metric-add-text');
+                if (addBtn) {
+                    addBtn.textContent = '+ Add';
+                    addBtn.style.color = '';
+                    btn.style.pointerEvents = '';
+                    btn.style.opacity = '';
+                }
+            });
+        }
+
+        // Auto-calculate on input and setup all event handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved theme
+            loadTheme();
+            
+            // Hide pro-only features for non-Pro users
+            if (!isPro) {
+                document.querySelectorAll('.pro-only').forEach(el => {
+                    el.classList.add('hidden');
+                });
+            }
+            
+            // Setup toggle buttons
+            document.getElementById('toggle-downPayment').onclick = function() {
+                inputTypes.downPayment = inputTypes.downPayment === '%' ? '$' : '%';
+                this.textContent = inputTypes.downPayment;
+                const input = document.getElementById('downPayment');
+                input.placeholder = inputTypes.downPayment === '%' ? '0%' : '$0';
+                if (input.value) addInputSymbol(input);
+                calculate();
+            };
+
+            document.getElementById('toggle-closingCosts').onclick = function() {
+                inputTypes.closingCosts = inputTypes.closingCosts === '%' ? '$' : '%';
+                this.textContent = inputTypes.closingCosts;
+                const input = document.getElementById('closingCosts');
+                input.placeholder = inputTypes.closingCosts === '%' ? '0%' : '$0';
+                if (input.value) addInputSymbol(input);
+                calculate();
+            };
+
+            document.getElementById('toggle-propertyTax').onclick = function() {
+                inputTypes.propertyTax = inputTypes.propertyTax === '%' ? '$' : '%';
+                this.textContent = inputTypes.propertyTax;
+                const input = document.getElementById('propertyTax');
+                input.placeholder = inputTypes.propertyTax === '%' ? '0%' : '$0';
+                if (input.value) addInputSymbol(input);
+                calculate();
+            };
+
+            document.getElementById('toggle-insurance').onclick = function() {
+                inputTypes.insurance = inputTypes.insurance === '%' ? '$' : '%';
+                this.textContent = inputTypes.insurance;
+                const input = document.getElementById('insurance');
+                input.placeholder = inputTypes.insurance === '%' ? '0%' : '$0';
+                if (input.value) addInputSymbol(input);
+                calculate();
+            };
+
+            document.getElementById('toggle-maintenance').onclick = function() {
+                inputTypes.maintenance = inputTypes.maintenance === '%' ? '$' : '%';
+                this.textContent = inputTypes.maintenance;
+                const input = document.getElementById('maintenance');
+                input.placeholder = inputTypes.maintenance === '%' ? '0%' : '$0';
+                if (input.value) addInputSymbol(input);
+                calculate();
+            };
+
+            document.getElementById('toggle-managementFee').onclick = function() {
+                inputTypes.managementFee = inputTypes.managementFee === '%' ? '$' : '%';
+                this.textContent = inputTypes.managementFee;
+                const input = document.getElementById('managementFee');
+                input.placeholder = inputTypes.managementFee === '%' ? '0%' : '$0';
+                if (input.value) addInputSymbol(input);
+                calculate();
+            };
+
+            document.getElementById('toggle-vacancyRate').onclick = function() {
+                inputTypes.vacancyRate = inputTypes.vacancyRate === '%' ? '$' : '%';
+                this.textContent = inputTypes.vacancyRate;
+                const input = document.getElementById('vacancyRate');
+                input.placeholder = inputTypes.vacancyRate === '%' ? '0%' : '$0';
+                if (input.value) addInputSymbol(input);
+                calculate();
+            };
+
+            // Sales Expense toggle (Page 2)
+            const toggleSalesExpense = document.getElementById('toggle-salesExpense');
+            if (toggleSalesExpense) {
+                toggleSalesExpense.onclick = function() {
+                    inputTypes.salesExpense = inputTypes.salesExpense === '%' ? '$' : '%';
+                    this.textContent = inputTypes.salesExpense;
+                    const input = document.getElementById('salesExpense');
+                    input.placeholder = inputTypes.salesExpense === '%' ? '0%' : '$0';
+                    if (input.value) addInputSymbol(input);
+                    calculateAdvancedReturns();
+                };
+            }
+
+            // Annual Appreciation toggle (Page 2)
+            const toggleAppreciation = document.getElementById('toggle-appreciationAdv');
+            if (toggleAppreciation) {
+                toggleAppreciation.onclick = function() {
+                    inputTypes.appreciationAdv = inputTypes.appreciationAdv === '%' ? '$' : '%';
+                    this.textContent = inputTypes.appreciationAdv;
+                    const input = document.getElementById('appreciationAdv');
+                    input.placeholder = inputTypes.appreciationAdv === '%' ? '0%' : '$0';
+                    if (input.value) addInputSymbol(input);
+                    calculateAdvancedReturns();
+                };
+            }
+
+            // Sales Expense toggle (Calculator page)
+            const toggleSalesExpenseCalc = document.getElementById('toggle-salesExpense-calc');
+            if (toggleSalesExpenseCalc) {
+                toggleSalesExpenseCalc.onclick = function() {
+                    inputTypes['salesExpense-calc'] = inputTypes['salesExpense-calc'] === '%' ? '$' : '%';
+                    this.textContent = inputTypes['salesExpense-calc'];
+                    const input = document.getElementById('salesExpense-calc');
+                    input.placeholder = inputTypes['salesExpense-calc'] === '%' ? '0%' : '$0';
+                    if (input.value) addInputSymbol(input);
+                    calculateAdvancedReturns();
+                };
+            }
+
+            // Annual Appreciation toggle (Calculator page)
+            const toggleAppreciationCalc = document.getElementById('toggle-appreciationAdv-calc');
+            if (toggleAppreciationCalc) {
+                toggleAppreciationCalc.onclick = function() {
+                    inputTypes['appreciationAdv-calc'] = inputTypes['appreciationAdv-calc'] === '%' ? '$' : '%';
+                    this.textContent = inputTypes['appreciationAdv-calc'];
+                    const input = document.getElementById('appreciationAdv-calc');
+                    input.placeholder = inputTypes['appreciationAdv-calc'] === '%' ? '0%' : '$0';
+                    if (input.value) addInputSymbol(input);
+                    calculateAdvancedReturns();
+                };
+            }
+
+            // Setup section collapse
+            document.querySelectorAll('.section-header').forEach(function(header) {
+                // Remove cursor pointer from header itself
+                header.style.cursor = 'default';
+                
+                // Only make the icon clickable
+                const icon = header.querySelector('.section-icon');
+                if (icon) {
+                    icon.style.cursor = 'pointer';
+                    icon.onclick = function(e) {
+                        e.stopPropagation();
+                        header.parentElement.classList.toggle('collapsed');
+                    };
+                }
+            });
+
+            // Auto-calculate on input
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    // Skip text inputs - they're not numbers
+                    if (input.id === 'projectName' || input.id === 'saveNameInput') return;
+                    
+                    // Format dollar inputs with commas (but not percent inputs or interest rate)
+                    const shouldFormat = input.id !== 'interestRate' && input.id !== 'loanTerm';
+                    
+                    if (shouldFormat) {
+                        const inputType = inputTypes[input.id];
+                        // Only format if it's a $ input or if no inputType is set (like purchasePrice)
+                        if (!inputType || inputType === '$') {
+                            formatInputWithCommas(input);
+                        }
+                    }
+                    
+                    // Add $ or % suffix based on input type
+                    addInputSymbol(input);
+                    
+                    calculate();
+                });
+            });
+
+            // Hide + buttons for metrics already at top
+            topMetrics.forEach(metric => {
+                const btn = document.querySelector(`.result-grid [data-metric="${metric}"] .add-metric-btn`);
+                if (btn) btn.classList.add('hidden');
+            });
+            
+            // Set up delete confirmation modal listeners
+            document.getElementById('confirmDelete').addEventListener('click', confirmDeleteCalculation);
+            document.getElementById('cancelDelete').addEventListener('click', cancelDelete);
+            
+            // Close modal when clicking outside
+            document.getElementById('deleteModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    cancelDelete();
+                }
+            });
+            
+            // Set up save name modal listeners
+            document.getElementById('confirmSaveName').addEventListener('click', confirmSaveName);
+            document.getElementById('cancelSaveName').addEventListener('click', cancelSaveName);
+            
+            // Set up overwrite modal listeners
+            document.getElementById('overwriteYes').addEventListener('click', function() {
+                document.getElementById('overwriteModal').style.display = 'none';
+                const { name, saved, isPro, existingIndex } = window.pendingSave;
+                // Remove the old one
+                saved.splice(existingIndex, 1);
+                // Complete the save
+                completeSave(name, saved, isPro);
+            });
+            
+            document.getElementById('overwriteNo').addEventListener('click', function() {
+                document.getElementById('overwriteModal').style.display = 'none';
+                const { name, saved, isPro } = window.pendingSave;
+                
+                // Check if they're at the free limit
+                if (!isPro && saved.length >= 3) {
+                    alert("You've reached the free limit of 3 saved calculations.\n\nTo save as a new calculation, either:\n• Overwrite an existing one, or\n• Upgrade to Pro for unlimited saves!");
+                    return;
+                }
+                
+                // User said no - add (1), (2), etc.
+                const existingNames = saved.map(calc => calc.name);
+                let counter = 1;
+                let newName = `${name} (${counter})`;
+                while (existingNames.includes(newName)) {
+                    counter++;
+                    newName = `${name} (${counter})`;
+                }
+                // Complete the save with new name
+                completeSave(newName, saved, isPro);
+            });
+            
+            // Allow Enter key to save
+            document.getElementById('saveNameInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    confirmSaveName();
+                }
+            });
+            
+            // Close modal when clicking outside
+            document.getElementById('saveNameModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    cancelSaveName();
+                }
+            });
+        });
+
+        // Add specific listeners for advanced analysis inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const appreciationInput = document.getElementById('appreciationAdv');
+            const salesExpenseInput = document.getElementById('salesExpense');
+            const appreciationInputCalc = document.getElementById('appreciationAdv-calc');
+            const salesExpenseInputCalc = document.getElementById('salesExpense-calc');
+            const holdPeriodInput = document.getElementById('holdPeriod');
+            const holdPeriodInputCalc = document.getElementById('holdPeriod-calc');
+            
+            if (appreciationInput) {
+                appreciationInput.addEventListener('input', calculateAdvancedReturns);
+            }
+            
+            if (salesExpenseInput) {
+                salesExpenseInput.addEventListener('input', calculateAdvancedReturns);
+            }
+
+            if (appreciationInputCalc) {
+                appreciationInputCalc.addEventListener('input', calculateAdvancedReturns);
+            }
+            
+            if (salesExpenseInputCalc) {
+                salesExpenseInputCalc.addEventListener('input', calculateAdvancedReturns);
+            }
+
+            if (holdPeriodInput) {
+                holdPeriodInput.addEventListener('input', calculateAdvancedReturns);
+            }
+
+            if (holdPeriodInputCalc) {
+                holdPeriodInputCalc.addEventListener('input', calculateAdvancedReturns);
+            }
+        });
+
+        function parseFormattedNumber(str) {
+            return parseFloat((str || '0').replace(/[$,%]/g, '')) || 0;
+        }
+
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(num);
+        }
+
+        function formatPercent(num) {
+            return num.toFixed(1) + '%';
+        }
+
+        function formatNumber(num) {
+            return num.toFixed(2);
+        }
+
+        function formatInputWithCommas(input) {
+            // Get current cursor position
+            let cursorPosition = input.selectionStart;
+            let value = input.value;
+            
+            // Remove all non-digit characters except decimal point
+            let digitsOnly = value.replace(/[^\d.]/g, '');
+            
+            // Count commas before cursor
+            let commasBeforeCursor = (value.substring(0, cursorPosition).match(/,/g) || []).length;
+            
+            // Format with commas
+            let formatted = digitsOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            
+            // Update input value
+            input.value = formatted;
+            
+            // Count new commas before cursor
+            let newCommasBeforeCursor = (formatted.substring(0, cursorPosition).match(/,/g) || []).length;
+            
+            // Adjust cursor position based on comma changes
+            let newCursorPosition = cursorPosition + (newCommasBeforeCursor - commasBeforeCursor);
+            input.setSelectionRange(newCursorPosition, newCursorPosition);
+        }
+
+        function addInputSymbol(input) {
+            // Special handling for fields without toggle buttons
+            if (input.id === 'purchasePrice' || input.id === 'monthlyRent') {
+                // Always show $ for these fields
+                let value = input.value;
+                if (!value) return;
+                
+                let cursorPosition = input.selectionStart;
+                value = value.replace(/[$]/g, '');
+                
+                if (value && !value.startsWith('$')) {
+                    input.value = '$' + value;
+                    input.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+                }
+                return;
+            }
+            
+            if (input.id === 'interestRate') {
+                // Always show % for interest rate
+                let value = input.value;
+                if (!value) return;
+                
+                let cursorPosition = input.selectionStart;
+                value = value.replace(/[%]/g, '');
+                
+                if (value && !value.endsWith('%')) {
+                    input.value = value + '%';
+                    input.setSelectionRange(cursorPosition, cursorPosition);
+                }
+                return;
+            }
+            
+            // For fields with toggle buttons
+            const inputType = inputTypes[input.id];
+            if (!inputType || !input.value) return;
+            
+            let value = input.value;
+            let cursorPosition = input.selectionStart;
+            
+            // Remove existing $ or % symbols
+            value = value.replace(/[$%]/g, '');
+            
+            // Add appropriate symbol
+            if (inputType === '$' && value && !value.startsWith('$')) {
+                input.value = '$' + value;
+                input.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+            } else if (inputType === '%' && value && !value.endsWith('%')) {
+                input.value = value + '%';
+                input.setSelectionRange(cursorPosition, cursorPosition);
+            }
+        }
+
+        function clearAll() {
+            document.querySelectorAll('input').forEach(input => {
+                input.value = input.id === 'loanTerm' ? '30' : '';
+            });
+            document.querySelectorAll('.metric-value, .result-item-value').forEach(el => {
+                el.textContent = '-';
+                el.className = el.className.replace(/ (positive|negative)/g, '');
+            });
+        }
+
+        function downloadCalculation() {
+            const data = `Investment Property Calculator - Results
+Generated: ${new Date().toLocaleString()}
+
+=== INPUTS ===
+Purchase Price: $${document.getElementById('purchasePrice').value || '0'}
+Down Payment: ${document.getElementById('downPayment').value || '0'}${inputTypes.downPayment}
+Interest Rate: ${document.getElementById('interestRate').value || '0'}%
+Loan Term: ${document.getElementById('loanTerm').value || '30'} years
+Closing Costs: ${document.getElementById('closingCosts').value || '0'}${inputTypes.closingCosts}
+Monthly Rent: $${document.getElementById('monthlyRent').value || '0'}
+Property Tax: ${document.getElementById('propertyTax').value || '0'}${inputTypes.propertyTax}
+Insurance: ${document.getElementById('insurance').value || '0'}${inputTypes.insurance}
+Maintenance: ${document.getElementById('maintenance').value || '0'}${inputTypes.maintenance}
+Utilities: ${document.getElementById('utilities').value || '0'}${inputTypes.utilities}
+Management Fee: ${document.getElementById('managementFee').value || '0'}${inputTypes.managementFee}
+Vacancy/Loss: ${document.getElementById('vacancyRate').value || '0'}${inputTypes.vacancyRate}
+
+=== KEY METRICS ===
+${topMetrics.map(m => {
+    const card = document.querySelector('.key-metrics [data-metric="' + m + '"]');
+    const label = card.querySelector('.metric-label').textContent;
+    const value = card.querySelector('.metric-value').textContent;
+    return label + ': ' + value;
+}).join('\n')}
+
+=== ALL METRICS ===
+Monthly Cash Flow: ${document.getElementById('monthlyCashFlow')?.textContent || 'N/A'}
+Annual Cash Flow: ${document.getElementById('annualCashFlow')?.textContent || 'N/A'}
+GRM: ${document.getElementById('grm')?.textContent || 'N/A'}
+DSCR: ${document.getElementById('dscr')?.textContent || 'N/A'}
+LTV: ${document.getElementById('ltv')?.textContent || 'N/A'}
+Equity Multiple: ${document.getElementById('equityMultiple')?.textContent || 'N/A'}
+Net Operating Income: ${document.getElementById('noi')?.textContent || 'N/A'}
+`;
+
+            const blob = new Blob([data], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'investment-calculator-' + new Date().toISOString().split('T')[0] + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function saveCalculation() {
+            // Get name from header input
+            let projectName = document.getElementById('projectName').value.trim();
+            
+            // If no name, show modal to ask for one
+            if (!projectName) {
+                // Show the save name modal
+                document.getElementById('saveNameInput').value = '';
+                document.getElementById('saveNameModal').style.display = 'block';
+                document.getElementById('saveNameInput').focus();
+                return;
+            }
+            
+            // Proceed with save
+            performSave(projectName);
+        }
+
+        function performSave(projectName) {
+            const saved = JSON.parse(localStorage.getItem('savedCalculations') || '[]');
+            const isPro = localStorage.getItem('isPro') === 'true';
+            
+            let name = projectName.trim() || 'My Investment Property';
+            
+            // Check if name already exists
+            const existingIndex = saved.findIndex(calc => calc.name === name);
+            
+            if (existingIndex !== -1) {
+                // Name exists - show custom overwrite modal
+                document.getElementById('overwriteMessage').textContent = `A calculation named "${name}" already exists. Do you want to overwrite it?`;
+                document.getElementById('overwriteModal').style.display = 'block';
+                
+                // Store the context for the modal buttons
+                window.pendingSave = { name, saved, isPro, existingIndex };
+                return; // Exit and wait for user response
+            } else {
+                // Name doesn't exist - check free limit for NEW save
+                if (!isPro && saved.length >= 3) {
+                    alert("You've reached the free limit of 3 saved calculations.\n\nUpgrade to Pro for unlimited saves!");
+                    return;
+                }
+            }
+            
+            // Proceed with actual save
+            completeSave(name, saved, isPro);
+        }
+        
+        function completeSave(name, saved, isPro) {
+            const savedCalc = {
+                id: Date.now(),
+                name: name,
+                date: new Date().toISOString(),
+                inputs: {
+                    purchasePrice: document.getElementById('purchasePrice').value,
+                    downPayment: document.getElementById('downPayment').value,
+                    downPaymentType: inputTypes.downPayment,
+                    interestRate: document.getElementById('interestRate').value,
+                    loanTerm: document.getElementById('loanTerm').value,
+                    closingCosts: document.getElementById('closingCosts').value,
+                    closingCostsType: inputTypes.closingCosts,
+                    monthlyRent: document.getElementById('monthlyRent').value,
+                    propertyTax: document.getElementById('propertyTax').value,
+                    propertyTaxType: inputTypes.propertyTax,
+                    insurance: document.getElementById('insurance').value,
+                    insuranceType: inputTypes.insurance,
+                    hoaFees: document.getElementById('hoaFees').value,
+                    hoaFeesType: inputTypes.hoaFees,
+                    maintenance: document.getElementById('maintenance').value,
+                    maintenanceType: inputTypes.maintenance,
+                    utilities: document.getElementById('utilities').value,
+                    utilitiesType: inputTypes.utilities,
+                    managementFee: document.getElementById('managementFee').value,
+                    managementFeeType: inputTypes.managementFee,
+                    vacancyRate: document.getElementById('vacancyRate').value,
+                    vacancyRateType: inputTypes.vacancyRate
+                },
+                metrics: {
+                    coc: document.getElementById('cocMetric')?.textContent || '-',
+                    capRate: document.getElementById('capRateMetric')?.textContent || '-',
+                    cashFlow: document.getElementById('cashFlowMetric')?.textContent || '-',
+                    grm: document.getElementById('grmMetric')?.textContent || '-',
+                    dscr: document.getElementById('dscrMetric')?.textContent || '-',
+                    ltv: document.getElementById('ltvMetric')?.textContent || '-'
+                }
+            };
+
+            saved.push(savedCalc);
+            localStorage.setItem('savedCalculations', JSON.stringify(saved));
+            
+            // Update the header with the saved name
+            document.getElementById('projectName').value = name;
+            
+            // Show success message
+            const remaining = isPro ? '∞' : (3 - saved.length);
+            const saveBtn = document.querySelector('button[onclick="saveCalculation()"]');
+            const originalText = saveBtn ? saveBtn.innerHTML : '';
+            
+            // Briefly change button to show success
+            if (saveBtn) {
+                saveBtn.innerHTML = '<span style="font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center;">✓</span>';
+                saveBtn.style.background = '#34C759';
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.style.background = '';
+                }, 2000);
+            }
+            
+            alert(`"${name}" saved successfully!\n\nSaves remaining: ${remaining}`);
+        }
+
+        function confirmSaveName() {
+            const nameInput = document.getElementById('saveNameInput');
+            const projectName = nameInput.value.trim() || 'My Investment Property';
+            
+            // Hide modal
+            document.getElementById('saveNameModal').style.display = 'none';
+            
+            // Update header and perform save
+            document.getElementById('projectName').value = projectName;
+            performSave(projectName);
+        }
+
+        function cancelSaveName() {
+            document.getElementById('saveNameModal').style.display = 'none';
+            document.getElementById('saveNameInput').value = '';
+        }
+
+        function loadSavedCalculations() {
+            const saved = JSON.parse(localStorage.getItem('savedCalculations') || '[]');
+            const container = document.getElementById('saved-list');
+            
+            if (saved.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary); opacity: 0.6;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">No saved calculations</div>
+                        <div style="font-size: 12px;">Save from calculator to view here</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedSaved = [...saved].reverse();
+            
+            container.innerHTML = sortedSaved.map(calc => {
+                // Determine color based on ROI value
+                let roiColor = '#5ab0ca'; // Default teal (matches gradient-primary end color)
+                if (calc.metrics.coc && calc.metrics.coc !== '-') {
+                    const roiValue = parseFloat(calc.metrics.coc);
+                    if (!isNaN(roiValue)) {
+                        if (roiValue > 0) roiColor = '#34c759'; // Green for positive
+                        else if (roiValue < 0) roiColor = '#ff3b30'; // Red for negative
+                    }
+                }
+                
+                return `
+                <div class="saved-accordion-item" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-left: 3px solid var(--accent-color); border-radius: 8px; margin-bottom: 6px; overflow: hidden;">
+                    <div class="saved-accordion-header" onclick="toggleAccordion(this)" style="padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;">
+                        <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${calc.name}</div>
+                        <div style="font-size: 14px; font-weight: 700; color: ${roiColor}; margin-right: 8px;">${calc.metrics.coc}</div>
+                        <div class="accordion-chevron" style="color: var(--text-secondary); font-size: 10px; transition: transform 0.2s;">▼</div>
+                    </div>
+                    <div class="saved-accordion-details" style="padding: 0 12px 10px 12px; background: var(--bg-tertiary); display: none;">
+                        <div style="display: flex; gap: 12px; font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                            <div>Cap <span style="font-weight: 700; color: var(--text-primary);">${calc.metrics.capRate}</span></div>
+                            <div>Cash <span style="font-weight: 700; color: var(--text-primary);">${calc.metrics.cashFlow}</span></div>
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <button class="load-calc-btn" data-id="${calc.id}" style="flex: 1; background: var(--gradient-primary); color: white; border: none; padding: 6px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">Load</button>
+                            <button class="delete-calc-btn" data-id="${calc.id}" style="background: transparent; border: 1px solid #ff3b30; color: #ff3b30; padding: 6px 10px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+            
+            // Add event listeners using event delegation - MUST happen after innerHTML is set
+            const loadButtons = container.querySelectorAll('.load-calc-btn');
+            const deleteButtons = container.querySelectorAll('.delete-calc-btn');
+            
+            loadButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = parseInt(this.getAttribute('data-id'));
+                    loadCalculation(id);
+                });
+            });
+            
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteSaved(id);
+                });
+            });
+        }
+
+        function loadCalculation(id) {
+            // Get saved calculations
+            const savedCalculations = localStorage.getItem('savedCalculations');
+            if (!savedCalculations) return;
+            
+            const saved = JSON.parse(savedCalculations);
+            
+            // Find the specific calculation
+            const calculation = saved.find(c => c.id === id);
+            if (!calculation) return;
+            
+            // Switch to calculator page FIRST
+            switchPage('calculator');
+            
+            // Load everything after switching pages
+            setTimeout(() => {
+                // Load project name
+                const projectNameInput = document.getElementById('projectName');
+                if (projectNameInput) {
+                    projectNameInput.value = calculation.name || '';
+                }
+                
+                // Load all input values
+                const inputs = calculation.inputs;
+                
+                // Purchase Price
+                if (document.getElementById('purchasePrice')) {
+                    document.getElementById('purchasePrice').value = inputs.purchasePrice || '';
+                }
+                
+                // Down Payment
+                if (document.getElementById('downPayment')) {
+                    document.getElementById('downPayment').value = inputs.downPayment || '';
+                }
+                if (document.getElementById('toggle-downPayment')) {
+                    inputTypes.downPayment = inputs.downPaymentType || '$';
+                    document.getElementById('toggle-downPayment').textContent = inputs.downPaymentType || '$';
+                }
+                
+                // Interest Rate
+                if (document.getElementById('interestRate')) {
+                    document.getElementById('interestRate').value = inputs.interestRate || '';
+                }
+                
+                // Loan Term
+                if (document.getElementById('loanTerm')) {
+                    document.getElementById('loanTerm').value = inputs.loanTerm || '';
+                }
+                
+                // Closing Costs
+                if (document.getElementById('closingCosts')) {
+                    document.getElementById('closingCosts').value = inputs.closingCosts || '';
+                }
+                if (document.getElementById('toggle-closingCosts')) {
+                    inputTypes.closingCosts = inputs.closingCostsType || '$';
+                    document.getElementById('toggle-closingCosts').textContent = inputs.closingCostsType || '$';
+                }
+                
+                // Monthly Rent
+                if (document.getElementById('monthlyRent')) {
+                    document.getElementById('monthlyRent').value = inputs.monthlyRent || '';
+                }
+                
+                // Property Tax
+                if (document.getElementById('propertyTax')) {
+                    document.getElementById('propertyTax').value = inputs.propertyTax || '';
+                }
+                if (document.getElementById('toggle-propertyTax')) {
+                    inputTypes.propertyTax = inputs.propertyTaxType || '$';
+                    document.getElementById('toggle-propertyTax').textContent = inputs.propertyTaxType || '$';
+                }
+                
+                // Insurance
+                if (document.getElementById('insurance')) {
+                    document.getElementById('insurance').value = inputs.insurance || '';
+                }
+                if (document.getElementById('toggle-insurance')) {
+                    inputTypes.insurance = inputs.insuranceType || '$';
+                    document.getElementById('toggle-insurance').textContent = inputs.insuranceType || '$';
+                }
+                
+                // HOA Fees
+                if (document.getElementById('hoaFees')) {
+                    document.getElementById('hoaFees').value = inputs.hoaFees || '';
+                }
+                if (document.getElementById('toggle-hoaFees')) {
+                    inputTypes.hoaFees = inputs.hoaFeesType || '$';
+                    document.getElementById('toggle-hoaFees').textContent = inputs.hoaFeesType || '$';
+                }
+                
+                // Maintenance
+                if (document.getElementById('maintenance')) {
+                    document.getElementById('maintenance').value = inputs.maintenance || '';
+                }
+                if (document.getElementById('toggle-maintenance')) {
+                    inputTypes.maintenance = inputs.maintenanceType || '$';
+                    document.getElementById('toggle-maintenance').textContent = inputs.maintenanceType || '$';
+                }
+                
+                // Utilities
+                if (document.getElementById('utilities')) {
+                    document.getElementById('utilities').value = inputs.utilities || '';
+                }
+                if (document.getElementById('toggle-utilities')) {
+                    inputTypes.utilities = inputs.utilitiesType || '$';
+                    document.getElementById('toggle-utilities').textContent = inputs.utilitiesType || '$';
+                }
+                
+                // Management Fee
+                if (document.getElementById('managementFee')) {
+                    document.getElementById('managementFee').value = inputs.managementFee || '';
+                }
+                if (document.getElementById('toggle-managementFee')) {
+                    inputTypes.managementFee = inputs.managementFeeType || '$';
+                    document.getElementById('toggle-managementFee').textContent = inputs.managementFeeType || '$';
+                }
+                
+                // Vacancy Rate
+                if (document.getElementById('vacancyRate')) {
+                    document.getElementById('vacancyRate').value = inputs.vacancyRate || '';
+                }
+                if (document.getElementById('toggle-vacancyRate')) {
+                    inputTypes.vacancyRate = inputs.vacancyRateType || '$';
+                    document.getElementById('toggle-vacancyRate').textContent = inputs.vacancyRateType || '$';
+                }
+                
+                // Recalculate
+                calculate();
+            }, 150);
+        }
+
+        let pendingDeleteId = null;
+
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            const details = item.querySelector('.saved-accordion-details');
+            const chevron = item.querySelector('.accordion-chevron');
+            
+            // Toggle display
+            if (details.style.display === 'none' || details.style.display === '') {
+                details.style.display = 'block';
+                chevron.style.transform = 'rotate(180deg)';
+                header.style.background = 'var(--bg-tertiary)';
+            } else {
+                details.style.display = 'none';
+                chevron.style.transform = 'rotate(0deg)';
+                header.style.background = '';
+            }
+        }
+
+        function deleteSaved(id) {
+            // Store the ID to delete
+            pendingDeleteId = id;
+            
+            // Show the modal
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function confirmDeleteCalculation() {
+            if (pendingDeleteId === null) return;
+            
+            let saved = JSON.parse(localStorage.getItem('savedCalculations') || '[]');
+            saved = saved.filter(c => c.id !== pendingDeleteId);
+            localStorage.setItem('savedCalculations', JSON.stringify(saved));
+            
+            // Hide modal
+            document.getElementById('deleteModal').style.display = 'none';
+            pendingDeleteId = null;
+            
+            // Reload the list
+            loadSavedCalculations();
+        }
+
+        function cancelDelete() {
+            document.getElementById('deleteModal').style.display = 'none';
+            pendingDeleteId = null;
+        }
+
+        function hideEditIcon() {
+            document.getElementById('editIcon').style.display = 'none';
+        }
+
+        function showEditIcon() {
+            document.getElementById('editIcon').style.display = 'block';
+        }
+
+        function calculate() {
+            // Check if there's ANY meaningful input
+            const hasInput = document.getElementById('purchasePrice').value || 
+                           document.getElementById('downPayment').value || 
+                           document.getElementById('interestRate').value ||
+                           document.getElementById('closingCosts').value ||
+                           document.getElementById('monthlyRent').value ||
+                           document.getElementById('propertyTax').value ||
+                           document.getElementById('insurance').value ||
+                           document.getElementById('hoaFees').value ||
+                           document.getElementById('maintenance').value ||
+                           document.getElementById('utilities').value ||
+                           document.getElementById('managementFee').value ||
+                           document.getElementById('vacancyRate').value;
+            
+            if (!hasInput) {
+                // No input yet, keep showing dashes
+                return;
+            }
+
+            const purchasePrice = parseFormattedNumber(document.getElementById('purchasePrice').value);
+            const interestRate = parseFormattedNumber(document.getElementById('interestRate').value);
+            const loanTermInput = document.getElementById('loanTerm').value;
+            const loanTerm = loanTermInput === '' ? 30 : parseFormattedNumber(loanTermInput);
+            const monthlyRent = parseFormattedNumber(document.getElementById('monthlyRent').value);
+            
+            // Show annual conversion for monthly rent
+            const rentConversionEl = document.getElementById('rent-conversion');
+            const rentInputValue = document.getElementById('monthlyRent').value.trim();
+            if (monthlyRent > 0) {
+                const annualRent = monthlyRent * 12;
+                if (annualRent >= 1000) {
+                    const kValue = annualRent / 1000;
+                    rentConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/yr`;
+                } else {
+                    rentConversionEl.textContent = `$${Math.round(annualRent)}/yr`;
+                }
+            } else if (rentInputValue !== '') {
+                rentConversionEl.textContent = '$0/yr';
+            } else {
+                rentConversionEl.textContent = '';
+            }
+
+            const downPaymentValue = parseFormattedNumber(document.getElementById('downPayment').value);
+            const downPayment = inputTypes.downPayment === '%' ? purchasePrice * (downPaymentValue / 100) : downPaymentValue;
+
+            // Show conversion for down payment
+            const downPaymentConversionEl = document.getElementById('downPayment-conversion');
+            const downPaymentInputValue = document.getElementById('downPayment').value.trim();
+            if (downPaymentValue > 0 || downPaymentInputValue !== '') {
+                if (inputTypes.downPayment === '%') {
+                    // In % mode, show dollar amount
+                    if (downPayment >= 1000) {
+                        const kValue = downPayment / 1000;
+                        downPaymentConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k`;
+                    } else {
+                        downPaymentConversionEl.textContent = `$${Math.round(downPayment)}`;
+                    }
+                } else {
+                    // In $ mode, show percentage
+                    if (purchasePrice > 0) {
+                        const percentage = (downPayment / purchasePrice) * 100;
+                        downPaymentConversionEl.textContent = `${percentage.toFixed(1)}%`;
+                    } else {
+                        downPaymentConversionEl.textContent = '';
+                    }
+                }
+            } else {
+                downPaymentConversionEl.textContent = '';
+            }
+
+            // Update down payment label - removed the dollar amount display since we show loan amount elsewhere
+            const dpLabel = document.getElementById('downPaymentLabel');
+            dpLabel.textContent = 'Down Payment';
+
+            const closingCostsValue = parseFormattedNumber(document.getElementById('closingCosts').value);
+            const closingCosts = inputTypes.closingCosts === '%' ? purchasePrice * (closingCostsValue / 100) : closingCostsValue;
+
+            // Show conversion for closing costs
+            const closingCostsConversionEl = document.getElementById('closingCosts-conversion');
+            if (closingCostsValue > 0 || document.getElementById('closingCosts').value.trim() !== '') {
+                if (inputTypes.closingCosts === '%') {
+                    // In % mode, show dollar amount
+                    if (closingCosts >= 1000) {
+                        const kValue = closingCosts / 1000;
+                        closingCostsConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k`;
+                    } else {
+                        closingCostsConversionEl.textContent = `$${Math.round(closingCosts)}`;
+                    }
+                } else {
+                    // In $ mode, show percentage
+                    if (purchasePrice > 0) {
+                        const percentage = (closingCosts / purchasePrice) * 100;
+                        closingCostsConversionEl.textContent = `${percentage.toFixed(1)}%`;
+                    } else {
+                        closingCostsConversionEl.textContent = '';
+                    }
+                }
+            } else {
+                closingCostsConversionEl.textContent = '';
+            }
+
+            const propertyTaxValue = parseFormattedNumber(document.getElementById('propertyTax').value);
+            const propertyTax = inputTypes.propertyTax === '%' ? purchasePrice * (propertyTaxValue / 100) : propertyTaxValue;
+            
+            // Show conversion for property tax
+            const propertyTaxConversionEl = document.getElementById('propertyTax-conversion');
+            if (propertyTaxValue > 0 || document.getElementById('propertyTax').value.trim() !== '') {
+                if (inputTypes.propertyTax === '%') {
+                    // In % mode, show annual total
+                    if (propertyTax >= 1000) {
+                        const kValue = propertyTax / 1000;
+                        propertyTaxConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/yr`;
+                    } else {
+                        propertyTaxConversionEl.textContent = `$${Math.round(propertyTax)}/yr`;
+                    }
+                } else {
+                    // In $ mode, show monthly breakdown with k notation
+                    const monthlyPropertyTax = propertyTax / 12;
+                    if (monthlyPropertyTax >= 1000) {
+                        const kValue = monthlyPropertyTax / 1000;
+                        propertyTaxConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/mo`;
+                    } else {
+                        propertyTaxConversionEl.textContent = `$${Math.round(monthlyPropertyTax)}/mo`;
+                    }
+                }
+            } else {
+                propertyTaxConversionEl.textContent = '';
+            }
+
+            const insuranceValue = parseFormattedNumber(document.getElementById('insurance').value);
+            const insurance = inputTypes.insurance === '%' ? purchasePrice * (insuranceValue / 100) : insuranceValue;
+            
+            // Show conversion for insurance
+            const insuranceConversionEl = document.getElementById('insurance-conversion');
+            if (insuranceValue > 0 || document.getElementById('insurance').value.trim() !== '') {
+                if (inputTypes.insurance === '%') {
+                    // In % mode, show annual total
+                    if (insurance >= 1000) {
+                        const kValue = insurance / 1000;
+                        insuranceConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/yr`;
+                    } else {
+                        insuranceConversionEl.textContent = `$${Math.round(insurance)}/yr`;
+                    }
+                } else {
+                    // In $ mode, show monthly breakdown with k notation
+                    const monthlyInsurance = insurance / 12;
+                    if (monthlyInsurance >= 1000) {
+                        const kValue = monthlyInsurance / 1000;
+                        insuranceConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/mo`;
+                    } else {
+                        insuranceConversionEl.textContent = `$${Math.round(monthlyInsurance)}/mo`;
+                    }
+                }
+            } else {
+                insuranceConversionEl.textContent = '';
+            }
+
+            const hoaFeesValue = parseFormattedNumber(document.getElementById('hoaFees').value);
+            const hoaFeesMonthly = hoaFeesValue; // Always $ now, no % option
+            const hoaFees = hoaFeesMonthly * 12; // Monthly to annual
+            
+            // Show annual conversion for monthly HOA
+            const hoaConversionEl = document.getElementById('hoaFees-conversion');
+            if (hoaFeesValue > 0 || document.getElementById('hoaFees').value.trim() !== '') {
+                const annualHOA = hoaFeesMonthly * 12;
+                if (annualHOA >= 1000) {
+                    const kValue = annualHOA / 1000;
+                    hoaConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/yr`;
+                } else {
+                    hoaConversionEl.textContent = `$${Math.round(annualHOA)}/yr`;
+                }
+            } else {
+                hoaConversionEl.textContent = '';
+            }
+
+            const maintenanceValue = parseFormattedNumber(document.getElementById('maintenance').value);
+            const maintenance = inputTypes.maintenance === '%' ? purchasePrice * (maintenanceValue / 100) : maintenanceValue;
+            
+            // Show conversion for maintenance
+            const maintenanceConversionEl = document.getElementById('maintenance-conversion');
+            if (maintenanceValue > 0 || document.getElementById('maintenance').value.trim() !== '') {
+                if (inputTypes.maintenance === '%') {
+                    // In % mode, show annual total
+                    if (maintenance >= 1000) {
+                        const kValue = maintenance / 1000;
+                        maintenanceConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/yr`;
+                    } else {
+                        maintenanceConversionEl.textContent = `$${Math.round(maintenance)}/yr`;
+                    }
+                } else {
+                    // In $ mode, show monthly breakdown with k notation
+                    const monthlyMaintenance = maintenance / 12;
+                    if (monthlyMaintenance >= 1000) {
+                        const kValue = monthlyMaintenance / 1000;
+                        maintenanceConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/mo`;
+                    } else {
+                        maintenanceConversionEl.textContent = `$${Math.round(monthlyMaintenance)}/mo`;
+                    }
+                }
+            } else {
+                maintenanceConversionEl.textContent = '';
+            }
+
+            const utilitiesValue = parseFormattedNumber(document.getElementById('utilities').value);
+            const utilitiesMonthly = utilitiesValue; // Always $ now, no % option
+            const utilities = utilitiesMonthly * 12; // Monthly to annual
+            
+            // Show annual conversion for monthly utilities
+            const utilitiesConversionEl = document.getElementById('utilities-conversion');
+            if (utilitiesValue > 0 || document.getElementById('utilities').value.trim() !== '') {
+                const annualUtilities = utilitiesMonthly * 12;
+                if (annualUtilities >= 1000) {
+                    const kValue = annualUtilities / 1000;
+                    utilitiesConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/yr`;
+                } else {
+                    utilitiesConversionEl.textContent = `$${Math.round(annualUtilities)}/yr`;
+                }
+            } else {
+                utilitiesConversionEl.textContent = '';
+            }
+
+            const annualGrossRent = monthlyRent * 12;
+
+            const managementFeeValue = parseFormattedNumber(document.getElementById('managementFee').value);
+            const managementFee = inputTypes.managementFee === '%' ? annualGrossRent * (managementFeeValue / 100) : managementFeeValue;
+            
+            // Show conversion for management fee
+            const managementFeeConversionEl = document.getElementById('managementFee-conversion');
+            if (managementFeeValue > 0 || document.getElementById('managementFee').value.trim() !== '') {
+                if (inputTypes.managementFee === '%') {
+                    // In % mode, show annual total
+                    if (managementFee >= 1000) {
+                        const kValue = managementFee / 1000;
+                        managementFeeConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/yr`;
+                    } else {
+                        managementFeeConversionEl.textContent = `$${Math.round(managementFee)}/yr`;
+                    }
+                } else {
+                    // In $ mode, show monthly breakdown
+                    const monthlyManagementFee = managementFee / 12;
+                    if (monthlyManagementFee >= 1000) {
+                        const kValue = monthlyManagementFee / 1000;
+                        managementFeeConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/mo`;
+                    } else {
+                        managementFeeConversionEl.textContent = `$${Math.round(monthlyManagementFee)}/mo`;
+                    }
+                }
+            } else {
+                managementFeeConversionEl.textContent = '';
+            }
+
+            const vacancyRateValue = parseFormattedNumber(document.getElementById('vacancyRate').value);
+            const vacancyRate = inputTypes.vacancyRate === '%' ? annualGrossRent * (vacancyRateValue / 100) : vacancyRateValue;
+            
+            // Show conversion for vacancy/loss
+            const vacancyRateConversionEl = document.getElementById('vacancyRate-conversion');
+            if (vacancyRateValue > 0 || document.getElementById('vacancyRate').value.trim() !== '') {
+                if (inputTypes.vacancyRate === '%') {
+                    // In % mode, show annual total
+                    if (vacancyRate >= 1000) {
+                        const kValue = vacancyRate / 1000;
+                        vacancyRateConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/yr`;
+                    } else {
+                        vacancyRateConversionEl.textContent = `$${Math.round(vacancyRate)}/yr`;
+                    }
+                } else {
+                    // In $ mode, show monthly breakdown
+                    const monthlyVacancy = vacancyRate / 12;
+                    if (monthlyVacancy >= 1000) {
+                        const kValue = monthlyVacancy / 1000;
+                        vacancyRateConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/mo`;
+                    } else {
+                        vacancyRateConversionEl.textContent = `$${Math.round(monthlyVacancy)}/mo`;
+                    }
+                }
+            } else {
+                vacancyRateConversionEl.textContent = '';
+            }
+
+            const loanAmount = purchasePrice - downPayment;
+            const totalCashInvested = downPayment + closingCosts;
+
+            const monthlyInterestRate = (interestRate / 100) / 12;
+            const numberOfPayments = loanTerm * 12;
+            let monthlyMortgage = 0;
+            
+            if (numberOfPayments > 0) {
+                if (interestRate > 0) {
+                    monthlyMortgage = loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
+                } else {
+                    monthlyMortgage = loanAmount / numberOfPayments;
+                }
+            }
+
+            // Show monthly payment next to interest rate
+            const interestRateConversionEl = document.getElementById('interestRate-conversion');
+            if ((interestRate > 0 || document.getElementById('interestRate').value.trim() !== '') && loanTerm > 0 && loanAmount > 0) {
+                if (monthlyMortgage >= 1000) {
+                    const kValue = monthlyMortgage / 1000;
+                    interestRateConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k/mo`;
+                } else {
+                    interestRateConversionEl.textContent = `$${Math.round(monthlyMortgage)}/mo`;
+                }
+            } else {
+                interestRateConversionEl.textContent = '';
+            }
+
+            const annualMortgage = monthlyMortgage * 12;
+            const effectiveGrossIncome = annualGrossRent - vacancyRate;
+            const noi = effectiveGrossIncome - (propertyTax + insurance + hoaFees + maintenance + utilities + managementFee);
+            const annualCashFlow = noi - annualMortgage;
+            const monthlyCashFlow = annualCashFlow / 12;
+
+            const coc = totalCashInvested > 0 ? (annualCashFlow / totalCashInvested) * 100 : 0;
+            const capRate = purchasePrice > 0 ? (noi / purchasePrice) * 100 : 0;
+            const grm = annualGrossRent > 0 ? purchasePrice / annualGrossRent : 0;
+            const dscr = annualMortgage > 0 ? noi / annualMortgage : 0;
+            const ltv = purchasePrice > 0 ? (loanAmount / purchasePrice) * 100 : 0;
+            
+            // Equity Multiple = (Total Cash Returned) / (Total Cash Invested)
+            // For simplicity, assuming property is held for 1 year and sold at purchase price
+            // Total Cash Returned = Annual Cash Flow + Down Payment (equity returned)
+            const equityMultiple = totalCashInvested > 0 ? (annualCashFlow + totalCashInvested) / totalCashInvested : 0;
+
+            // Update key metrics at top (default 3)
+            const cocEl = document.getElementById('cocMetric');
+            const capRateEl = document.getElementById('capRateMetric');
+            const cashFlowEl = document.getElementById('cashFlowMetric');
+            
+            if (cocEl) {
+                cocEl.textContent = formatPercent(coc);
+                cocEl.className = 'metric-value';
+                if (coc > 0) {
+                    cocEl.className += ' positive';
+                } else if (coc < 0) {
+                    cocEl.className += ' negative';
+                }
+            }
+            
+            if (capRateEl) {
+                capRateEl.textContent = formatPercent(capRate);
+                capRateEl.className = 'metric-value';
+                if (capRate > 0) {
+                    capRateEl.className += ' positive';
+                } else if (capRate < 0) {
+                    capRateEl.className += ' negative';
+                }
+            }
+            
+            if (cashFlowEl) {
+                cashFlowEl.textContent = formatCurrency(monthlyCashFlow);
+                cashFlowEl.className = 'metric-value';
+                if (monthlyCashFlow > 0) {
+                    cashFlowEl.className += ' positive';
+                } else if (monthlyCashFlow < 0) {
+                    cashFlowEl.className += ' negative';
+                }
+            }
+
+            // Update bottom section values (including ROI and Cap Rate) - only if elements exist
+            const cocBottomEl = document.getElementById('coc');
+            if (cocBottomEl) {
+                cocBottomEl.textContent = formatPercent(coc);
+                cocBottomEl.className = 'result-item-value';
+                if (coc > 0) {
+                    cocBottomEl.className += ' positive';
+                } else if (coc < 0) {
+                    cocBottomEl.className += ' negative';
+                }
+            }
+
+            const capRateBottomEl = document.getElementById('capRate');
+            if (capRateBottomEl) {
+                capRateBottomEl.textContent = formatPercent(capRate);
+                capRateBottomEl.className = 'result-item-value';
+                if (capRate > 0) {
+                    capRateBottomEl.className += ' positive';
+                } else if (capRate < 0) {
+                    capRateBottomEl.className += ' negative';
+                }
+            }
+
+            const annualCashFlowEl = document.getElementById('annualCashFlow');
+            if (annualCashFlowEl) {
+                annualCashFlowEl.textContent = formatCurrency(annualCashFlow);
+                annualCashFlowEl.className = 'result-item-value';
+                if (annualCashFlow > 0) {
+                    annualCashFlowEl.className += ' positive';
+                } else if (annualCashFlow < 0) {
+                    annualCashFlowEl.className += ' negative';
+                }
+            }
+            
+            const monthlyCashFlowEl = document.getElementById('monthlyCashFlow');
+            if (monthlyCashFlowEl) {
+                monthlyCashFlowEl.textContent = formatCurrency(monthlyCashFlow);
+                monthlyCashFlowEl.className = 'result-item-value';
+                if (monthlyCashFlow > 0) {
+                    monthlyCashFlowEl.className += ' positive';
+                } else if (monthlyCashFlow < 0) {
+                    monthlyCashFlowEl.className += ' negative';
+                }
+            }
+            
+            const grmEl = document.getElementById('grm');
+            if (grmEl) {
+                grmEl.textContent = formatNumber(grm);
+                grmEl.className = 'result-item-value';
+                // GRM: Lower is better (good deal), typical good range is 4-7
+                if (grm > 0 && grm <= 10) {
+                    grmEl.className += ' positive'; // Good GRM
+                } else if (grm > 10) {
+                    grmEl.className += ' negative'; // High GRM (bad deal)
+                }
+            }
+            
+            const dscrEl = document.getElementById('dscr');
+            if (dscrEl) {
+                dscrEl.textContent = formatNumber(dscr);
+                dscrEl.className = 'result-item-value';
+                if (dscr > 1) {
+                    dscrEl.className += ' positive'; // Good DSCR
+                } else if (dscr > 0) {
+                    dscrEl.className += ' negative'; // Bad DSCR
+                }
+            }
+            
+            const ltvEl = document.getElementById('ltv');
+            if (ltvEl) {
+                ltvEl.textContent = formatPercent(ltv);
+                ltvEl.className = 'result-item-value';
+                // LTV: Lower is better (less leveraged), typical conventional max is 80%
+                if (ltv > 0 && ltv <= 80) {
+                    ltvEl.className += ' positive'; // Good LTV
+                } else if (ltv > 80) {
+                    ltvEl.className += ' negative'; // High LTV (risky)
+                }
+            }
+            
+            // Update pinned top metrics if they exist
+            const grmMetricEl = document.getElementById('grmMetric');
+            if (grmMetricEl) {
+                grmMetricEl.textContent = formatNumber(grm);
+                grmMetricEl.className = 'metric-value';
+                if (grm > 0 && grm <= 10) {
+                    grmMetricEl.className += ' positive';
+                } else if (grm > 10) {
+                    grmMetricEl.className += ' negative';
+                }
+            }
+            
+            const dscrMetricEl = document.getElementById('dscrMetric');
+            if (dscrMetricEl) {
+                dscrMetricEl.textContent = formatNumber(dscr);
+                dscrMetricEl.className = 'metric-value';
+                if (dscr > 1) {
+                    dscrMetricEl.className += ' positive';
+                } else if (dscr > 0) {
+                    dscrMetricEl.className += ' negative';
+                }
+            }
+            
+            const ltvMetricEl = document.getElementById('ltvMetric');
+            if (ltvMetricEl) {
+                ltvMetricEl.textContent = formatPercent(ltv);
+                ltvMetricEl.className = 'metric-value';
+                if (ltv > 0 && ltv <= 80) {
+                    ltvMetricEl.className += ' positive';
+                } else if (ltv > 80) {
+                    ltvMetricEl.className += ' negative';
+                }
+            }
+            
+            const equityMultipleEl = document.getElementById('equityMultiple');
+            if (equityMultipleEl) {
+                equityMultipleEl.textContent = equityMultiple.toFixed(2) + 'x';
+                equityMultipleEl.className = 'result-item-value';
+                // Equity Multiple: >1.0x means you made money back plus more
+                if (equityMultiple >= 1.0) {
+                    equityMultipleEl.className += ' positive'; // Made money back
+                } else if (equityMultiple > 0) {
+                    equityMultipleEl.className += ' negative'; // Losing money
+                }
+            }
+            
+            const noiEl = document.getElementById('noi');
+            if (noiEl) {
+                noiEl.textContent = formatCurrency(noi);
+                noiEl.className = 'result-item-value';
+                if (noi > 0) {
+                    noiEl.className += ' positive';
+                } else if (noi < 0) {
+                    noiEl.className += ' negative';
+                }
+            }
+
+            // Update any dynamically added metrics at the top
+            topMetrics.forEach(metricKey => {
+                const topMetricEl = document.getElementById(metricKey + 'Metric');
+                const bottomMetricEl = document.getElementById(metricKey);
+                if (topMetricEl && bottomMetricEl) {
+                    topMetricEl.textContent = bottomMetricEl.textContent;
+                    topMetricEl.className = bottomMetricEl.className.replace('result-item-value', 'metric-value');
+                }
+            });
+
+            // Calculate Advanced Time-Based Returns
+            calculateAdvancedReturns();
+        }
+
+        function calculateAdvancedReturns() {
+            const holdPeriodInput = document.getElementById('holdPeriod') || document.getElementById('holdPeriod-calc');
+            const holdPeriod = holdPeriodInput ? parseFloat(holdPeriodInput.value) || 0 : 0;
+            const appreciationInput = document.getElementById('appreciationAdv');
+            const appreciationRate = appreciationInput ? parseFormattedNumber(appreciationInput.value) / 100 : 0.03;
+            
+            // Get sales expense from input - check both Page 2 and Calculator page
+            const salesExpenseInput = document.getElementById('salesExpense') || document.getElementById('salesExpense-calc');
+            const salesExpenseValue = salesExpenseInput ? parseFormattedNumber(salesExpenseInput.value) : 6;
+            const salesExpenseType = inputTypes['salesExpense-calc'] || inputTypes['salesExpense'] || '%';
+
+            // Get base values
+            const purchasePrice = parseFormattedNumber(document.getElementById('purchasePrice').value);
+            if (!purchasePrice) {
+                // Reset displays if no purchase price
+                const loanBalanceEl = document.getElementById('loanBalance');
+                const netEquityEl = document.getElementById('netEquity');
+                const totalProfitEl = document.getElementById('totalProfit');
+                if (loanBalanceEl) loanBalanceEl.textContent = '$0';
+                if (netEquityEl) netEquityEl.textContent = '$0';
+                if (totalProfitEl) totalProfitEl.textContent = '$0';
+                return;
+            }
+            
+            const downPaymentValue = parseFormattedNumber(document.getElementById('downPayment').value);
+            const downPaymentPercent = inputTypes.downPayment === '%' ? downPaymentValue / 100 : downPaymentValue / purchasePrice;
+            const closingCosts = parseFormattedNumber(document.getElementById('closingCosts').value);
+            const initialInvestment = purchasePrice * downPaymentPercent + closingCosts;
+            const loanAmount = purchasePrice * (1 - downPaymentPercent);
+            const interestRate = parseFormattedNumber(document.getElementById('interestRate').value) / 100;
+            const loanTerm = parseFloat(document.getElementById('loanTerm').value) || 30;
+            
+            // Get annual cash flow
+            const monthlyRent = parseFormattedNumber(document.getElementById('monthlyRent').value);
+            const annualIncome = monthlyRent * 12;
+            const monthlyPayment = loanAmount > 0 ? (loanAmount * (interestRate/12 * Math.pow(1 + interestRate/12, loanTerm*12))) / (Math.pow(1 + interestRate/12, loanTerm*12) - 1) : 0;
+            
+            // Calculate total expenses
+            const propertyTaxValue = parseFormattedNumber(document.getElementById('propertyTax').value);
+            const propertyTax = inputTypes.propertyTax === '%' ? purchasePrice * (propertyTaxValue / 100) : propertyTaxValue;
+            const insuranceValue = parseFormattedNumber(document.getElementById('insurance').value);
+            const insurance = inputTypes.insurance === '%' ? purchasePrice * (insuranceValue / 100) : insuranceValue;
+            const hoaFeesValue = parseFormattedNumber(document.getElementById('hoaFees').value);
+            const hoaFees = inputTypes.hoaFees === '%' ? annualIncome * (hoaFeesValue / 100) : hoaFeesValue;
+            const maintenanceValue = parseFormattedNumber(document.getElementById('maintenance').value);
+            const maintenance = inputTypes.maintenance === '%' ? purchasePrice * (maintenanceValue / 100) : maintenanceValue;
+            const utilitiesMonthly = parseFormattedNumber(document.getElementById('utilities').value);
+            const utilities = utilitiesMonthly * 12;
+            const managementFeeValue = parseFormattedNumber(document.getElementById('managementFee').value);
+            const managementFee = inputTypes.managementFee === '%' ? annualIncome * (managementFeeValue / 100) : managementFeeValue;
+            const vacancyValue = parseFormattedNumber(document.getElementById('vacancyRate').value);
+            const vacancyLoss = inputTypes.vacancyRate === '%' ? annualIncome * (vacancyValue / 100) : vacancyValue;
+            
+            const totalExpenses = propertyTax + insurance + hoaFees + maintenance + utilities + managementFee + vacancyLoss + (monthlyPayment * 12);
+            const annualCashFlow = annualIncome - totalExpenses;
+            
+            // Calculate future property value
+            const futurePropertyValue = purchasePrice * Math.pow(1 + appreciationRate, holdPeriod);
+            
+            // Calculate sales expense amount based on type
+            let salesExpenseAmount;
+            let exitCosts;
+            if (salesExpenseType === '%') {
+                exitCosts = salesExpenseValue / 100;
+                salesExpenseAmount = futurePropertyValue * exitCosts;
+            } else {
+                salesExpenseAmount = salesExpenseValue;
+                exitCosts = salesExpenseAmount / futurePropertyValue;
+            }
+            
+            // Update helpers for appreciation (show future property value)
+            const appreciationConversionEl = document.getElementById('appreciation-conversion');
+            const appreciationConversionCalcEl = document.getElementById('appreciation-conversion-calc');
+            if (appreciationConversionEl && futurePropertyValue) {
+                if (futurePropertyValue >= 1000) {
+                    const kValue = futurePropertyValue / 1000;
+                    appreciationConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k`;
+                } else {
+                    appreciationConversionEl.textContent = `$${Math.round(futurePropertyValue)}`;
+                }
+            }
+            if (appreciationConversionCalcEl && futurePropertyValue) {
+                if (futurePropertyValue >= 1000) {
+                    const kValue = futurePropertyValue / 1000;
+                    appreciationConversionCalcEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k`;
+                } else {
+                    appreciationConversionCalcEl.textContent = `$${Math.round(futurePropertyValue)}`;
+                }
+            }
+            
+            // Update helpers for sales expense
+            const salesExpenseConversionEl = document.getElementById('salesExpense-conversion');
+            const salesExpenseConversionCalcEl = document.getElementById('salesExpense-conversion-calc');
+            if (salesExpenseConversionEl && salesExpenseAmount) {
+                if (salesExpenseAmount >= 1000) {
+                    const kValue = salesExpenseAmount / 1000;
+                    salesExpenseConversionEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k`;
+                } else {
+                    salesExpenseConversionEl.textContent = `$${Math.round(salesExpenseAmount)}`;
+                }
+            }
+            if (salesExpenseConversionCalcEl && salesExpenseAmount) {
+                if (salesExpenseAmount >= 1000) {
+                    const kValue = salesExpenseAmount / 1000;
+                    salesExpenseConversionCalcEl.textContent = `$${kValue % 1 === 0 ? Math.round(kValue) : kValue.toFixed(1)}k`;
+                } else {
+                    salesExpenseConversionCalcEl.textContent = `$${Math.round(salesExpenseAmount)}`;
+                }
+            }
+            
+            // Calculate total mortgage payments (principal + interest paid over hold period)
+            const monthlyRate = interestRate / 12;
+            const totalPayments = loanTerm * 12;
+            const paymentsMade = holdPeriod * 12;
+            const totalMortgagePaid = monthlyPayment > 0 ? monthlyPayment * paymentsMade : 0;
+            
+            // Calculate remaining loan balance (for net equity calculation)
+            const remainingBalance = loanAmount > 0 && paymentsMade < totalPayments ? 
+                loanAmount * (Math.pow(1 + monthlyRate, totalPayments) - Math.pow(1 + monthlyRate, paymentsMade)) / 
+                (Math.pow(1 + monthlyRate, totalPayments) - 1) : 0;
+            
+            // Calculate sale proceeds
+            const saleCosts = futurePropertyValue * exitCosts;
+            const netSaleProceeds = futurePropertyValue - saleCosts - remainingBalance;
+            
+            // Total cash flows
+            const totalCashFlows = annualCashFlow * holdPeriod;
+            
+            // Total profit
+            const totalProfit = netSaleProceeds - initialInvestment + totalCashFlows;
+            
+            // Update Future Projections on Page 2
+            const futureValueEl = document.getElementById('futureValue');
+            if (futureValueEl) {
+                futureValueEl.textContent = formatCurrency(futurePropertyValue);
+                futureValueEl.className = 'projection-value';
+            }
+            
+            const loanBalanceEl = document.getElementById('loanBalance');
+            if (loanBalanceEl) {
+                loanBalanceEl.textContent = formatCurrency(totalMortgagePaid);
+                loanBalanceEl.className = 'projection-value loan-balance';
+            }
+            
+            const netEquityEl = document.getElementById('netEquity');
+            if (netEquityEl) {
+                netEquityEl.textContent = formatCurrency(netSaleProceeds);
+                netEquityEl.className = 'projection-value';
+                if (netSaleProceeds > 0) {
+                    netEquityEl.className += ' positive';
+                } else if (netSaleProceeds < 0) {
+                    netEquityEl.className += ' negative';
+                }
+            }
+            
+            const profitEl = document.getElementById('totalProfit');
+            if (profitEl) {
+                profitEl.textContent = formatCurrency(totalProfit);
+                profitEl.className = 'projection-value';
+                if (totalProfit > 0) {
+                    profitEl.className += ' positive';
+                } else if (totalProfit < 0) {
+                    profitEl.className += ' negative';
+                }
+            }
+
+            // Update Future Projections on Calculator page (if pinned)
+            const loanBalanceCalcEl = document.getElementById('loanBalance-calc');
+            if (loanBalanceCalcEl) {
+                if (purchasePrice > 0 && holdPeriod > 0) {
+                    loanBalanceCalcEl.textContent = formatCurrency(totalMortgagePaid);
+                    loanBalanceCalcEl.className = 'projection-value loan-balance';
+                } else {
+                    loanBalanceCalcEl.textContent = '-';
+                    loanBalanceCalcEl.className = 'projection-value neutral';
+                }
+            }
+            
+            const netEquityCalcEl = document.getElementById('netEquity-calc');
+            if (netEquityCalcEl) {
+                if (purchasePrice > 0 && holdPeriod > 0) {
+                    netEquityCalcEl.textContent = formatCurrency(netSaleProceeds);
+                    netEquityCalcEl.className = 'projection-value';
+                    if (netSaleProceeds > 0) {
+                        netEquityCalcEl.className += ' positive';
+                    } else if (netSaleProceeds < 0) {
+                        netEquityCalcEl.className += ' negative';
+                    }
+                } else {
+                    netEquityCalcEl.textContent = '-';
+                    netEquityCalcEl.className = 'projection-value neutral';
+                }
+            }
+            
+            const profitCalcEl = document.getElementById('totalProfit-calc');
+            if (profitCalcEl) {
+                if (purchasePrice > 0 && holdPeriod > 0) {
+                    profitCalcEl.textContent = formatCurrency(totalProfit);
+                    profitCalcEl.className = 'projection-value';
+                    if (totalProfit > 0) {
+                        profitCalcEl.className += ' positive';
+                    } else if (totalProfit < 0) {
+                        profitCalcEl.className += ' negative';
+                    }
+                } else {
+                    profitCalcEl.textContent = '-';
+                    profitCalcEl.className = 'projection-value neutral';
+                }
+            }
+        }
+
+        function runScenario(scenarioType) {
+            alert(`Scenario analysis: ${scenarioType}\n\nThis feature will run a detailed what-if analysis and show you exactly how this change affects your investment returns over time.`);
+        }
+
+        function pinAdvancedMetrics() {
+            const section = document.getElementById('section-advanced');
+            section.style.display = 'block';
+            // Sync values from Page 2 to Calculator page
+            syncAdvancedMetrics();
+            // Navigate to calculator directly
+            switchPage('calculator');
+            // Scroll to the Sale Metrics section
+            setTimeout(() => {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            // Store pinned state
+            localStorage.setItem('advancedMetricsPinned', 'true');
+        }
+
+        function unpinAdvancedMetrics() {
+            const section = document.getElementById('section-advanced');
+            section.style.display = 'none';
+            localStorage.setItem('advancedMetricsPinned', 'false');
+        }
+
+        function syncAdvancedMetrics() {
+            // Sync from Page 2 to Calculator page
+            const appreciation = document.getElementById('appreciationAdv').value;
+            const salesExpense = document.getElementById('salesExpense').value;
+            const holdPeriod = document.getElementById('holdPeriod').value;
+            
+            document.getElementById('appreciationAdv-calc').value = appreciation;
+            document.getElementById('salesExpense-calc').value = salesExpense;
+            document.getElementById('holdPeriod-calc').value = holdPeriod;
+            
+            // Recalculate
+            calculateAdvancedReturns();
+        }
+
+        // Check if advanced metrics should be pinned on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const isPinned = localStorage.getItem('advancedMetricsPinned');
+            if (isPinned === 'true') {
+                document.getElementById('section-advanced').style.display = 'block';
+            }
+        });
+    </script>
+    
+    <script>
+        // Register service worker for PWA (disabled for local testing)
+        // Uncomment when deploying as PWA
+        /*
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(() => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed:', err));
+        }
+        */
+    </script>
+</body>
+</html>
